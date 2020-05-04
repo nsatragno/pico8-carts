@@ -241,54 +241,54 @@ function _update60()
  end
 
  if state == "menu" then
-	if btn(🅾️) then
+  if btn(🅾️) then
    state = "alive"
   end
   return
  end
 
  if state == "game over" then
-	if btn(🅾️) then
+  if btn(🅾️) then
    restart()
   end
   return
  end
 
  if state == "alive" then
-	if btn(⬅️) then
-		a -= .02
-	end
-	if btn(➡️) then
-	 a += .02
-	end
-	if btn(⬆️) then
-	 s += .03
-	end
-	if btn(⬇️) then
-	 s -= .03
-	end
-	if btn(🅾️) and fire == false then
-	 fire = true
-	 local l =
-	  sqrt(dx * dx + dy * dy)
-	 add(shots, {
-	  x = x,
-	  y = y,
-	  dx = dx / l * 3,
-	  dy = dy / l * 3,
-	  life = 64
-	 })
+  if btn(⬅️) then
+    a -= .02
+  end
+  if btn(➡️) then
+   a += .02
+  end
+  if btn(⬆️) then
+   s += .03
+  end
+  if btn(⬇️) then
+   s -= .03
+  end
+  if btn(🅾️) and fire == false then
+   fire = true
+   local l =
+    sqrt(dx * dx + dy * dy)
+   add(shots, {
+    x = x,
+    y = y,
+    dx = dx / l * 3,
+    dy = dy / l * 3,
+    life = 64
+   })
    sfx(0)
-	elseif not btn(🅾️) then
-	 fire = false
-	end
-	s = mid(0.3, s, 1.3)
-	if a >= 1 then a -= 1 end
-	if a < 0 then a += 1 end
-	dx = sin(clamp(a) - .25) * s
-	dy = cos(clamp(a) - .25) * s
-	x += dx
-	y += dy
+  elseif not btn(🅾️) then
+   fire = false
+  end
+  s = mid(0.3, s, 1.3)
+  if a >= 1 then a -= 1 end
+  if a < 0 then a += 1 end
+  dx = sin(clamp(a) - .25) * s
+  dy = cos(clamp(a) - .25) * s
+  x += dx
+  y += dy
   if x >= 1084 then
    x = -60
   elseif x < -60 then
@@ -300,40 +300,40 @@ function _update60()
    y = 572
   end
 
-	-- rescue astronauts
-	for astro in all(astros) do
-	 if colliding(
-	      astro,
-	      { x = x, y = y}) and
+  -- rescue astronauts
+  for astro in all(astros) do
+   if colliding(
+        astro,
+        { x = x, y = y}) and
       astro.state != "dead" then
-	  del(astros, astro)
-	  score += 100
+    del(astros, astro)
+    score += 100
     sfx(3)
     current_message = messages[flr(rnd(#messages)) + 1]
     current_message_color = 12
     message_timer = 180
-	 end
-	end
+   end
+  end
 
-	-- have some octopi fire
-	for octopus in all(octopi) do
-	 if abs(octopus.x - x) <= 40 and
-	    abs(octopus.y - y) <= 40 and
-	    octopus.state != "dead" and
-	    octopus.cd <= 0 then
+  -- have some octopi fire
+  for octopus in all(octopi) do
+   if abs(octopus.x - x) <= 40 and
+      abs(octopus.y - y) <= 40 and
+      octopus.state != "dead" and
+      octopus.cd <= 0 then
     local v = vector_to_player(octopus)
-	  add(bullets, {
-	   x = octopus.x,
-	   y = octopus.y,
-	   dx = v.dx,
-	   dy = v.dy,
-	   life = 100
-	  })
-	  octopus.cd = rnd(100) + 60
+    add(bullets, {
+     x = octopus.x,
+     y = octopus.y,
+     dx = v.dx,
+     dy = v.dy,
+     life = 100
+    })
+    octopus.cd = rnd(100) + 60
    elseif octopus.cd > 0 then
     octopus.cd -= 1
-	 end
-	end
+   end
+  end
 
   -- make chompers chase the player
   for chomper in all(chompers) do
@@ -497,7 +497,7 @@ function _draw()
 
  -- draw the ship
  if state == "alive" or state == "menu" then
- 	spr(a * 8 + 1, x, y)
+  spr(a * 8 + 1, x, y)
  elseif state == "dead" then
   time_death -= 1
   if time_death > 0 then
