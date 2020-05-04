@@ -241,14 +241,14 @@ function _update60()
  end
 
  if state == "menu" then
-  if btn(🅾️) then
+  if btnp(🅾️) then
    state = "alive"
   end
   return
  end
 
  if state == "game over" then
-  if btn(🅾️) then
+  if btnp(🅾️) then
    restart()
   end
   return
