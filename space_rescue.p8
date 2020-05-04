@@ -579,7 +579,7 @@ function _draw()
  elseif state == "game over" then
   print("game over", 45, 48, 8)
   print(game_over_message, 0, 56, 11)
-  print("  press any button to try again", 0, 72, 7)
+  print("     press 🅾️ to try again", 4, 72, 7)
  else
   print("score: "..score, 7)
   if current_message then
