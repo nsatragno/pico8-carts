@@ -592,8 +592,8 @@ function _draw()
  -- draw the hud
  camera()
  if state == "menu" then
-  print(center("space  rescue"), 0, 44)
-  print(center("press 🅾️ to start"), 0, 76)
+  print(center("space  rescue"), 0, 44, 7)
+  print(center("press 🅾️ to start"), 0, 76, 7)
  elseif state == "game over" then
   print(center("game  over"), 0, 48, 8)
   print(center("score: "..pad(score, 5)), 0, 56, 11)
