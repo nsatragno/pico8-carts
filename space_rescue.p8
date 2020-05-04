@@ -9,6 +9,15 @@ function center(string)
  return string
 end
 
+-- pads a number to the right so it takes |length| spaces
+function pad(num, length)
+ local string = tostr(num)
+ for i = #string, length - 1 do
+  string = "0"..string
+ end
+ return string
+end
+
 function clamp(a)
  return flr(a * 8) / 8
 end
@@ -587,7 +596,7 @@ function _draw()
   print(center("press 🅾️ to start"), 0, 76)
  elseif state == "game over" then
   print(center("game  over"), 0, 48, 8)
-  print(center("score: "..score), 0, 56, 11)
+  print(center("score: "..pad(score, 5)), 0, 56, 11)
   print(center(game_over_message), 0, 64, 11)
   print(center("press 🅾️ to try again"), 0, 72, 7)
  else
@@ -595,7 +604,8 @@ function _draw()
   if current_message then
    print(current_message, 2, 2, current_message_color)
   else
-   print("score: "..score, 2, 2, 7)
+   print("p1 "..pad(score, 5), 2, 2, 7)
+   print("left: "..pad(#astros, 2), 95, 2, 7)
   end
   rect(0, 0, 127, 8)
  end
