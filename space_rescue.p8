@@ -106,7 +106,7 @@ function _init()
   "     hahaha, git good scrub     ",
   "         you suuuuuuuck         ",
   "         git good, noob         ",
-  "           l2p scrub            ",
+  "           l2p  scrub           ",
   "      get duuuuuuuunked on      ",
  }
  astro_dead_messages = {
@@ -144,34 +144,38 @@ function _init()
   "need saving? why not zoidberg?",
   "rocket maaaaaaaaaan!",
  }
+ restart()
+end
+
+function restart()
+ state = "menu"
+ stars = {}
  current_message = nil
  current_message_color = nil
  message_timer = 0
+ for i = 1, rnd(700) + 300 do
+  stars[i] = { x = rnd(1024),
+               y = rnd(512) }
+ end
+ score = 0
+ start(1)
+end
 
+function start(difficulty)
  x = 500
  dx = 0
  y = 250
  dy = 0
  a = 0
  s = 0
- fire = false
- state = "menu"
- score = 0
- parts = {}
  camera_x = x - 64 + dx * 30
  camera_y = y - 64 + dy * 30
-
+ fire = false
+ parts = {}
  shots = {}
 
- stars = {}
- for i = 1, rnd(700) + 300 do
-  stars[i] = { x = rnd(1024),
-               y = rnd(512) }
- end
-
  astros = {}
- for i = 1, 100 do
- -- for i = 1, 10 do
+ for i = 1, 10 do
   local c = spawn_coordinates(astros)
   astros[i] = { x = c.x,
                 y = c.y,
@@ -244,6 +248,9 @@ function _update60()
  end
 
  if state == "game over" then
+	if btn(🅾️) then
+   restart()
+  end
   return
  end
 
@@ -567,11 +574,12 @@ function _draw()
  -- draw the hud
  camera()
  if state == "menu" then
-  print("space rescue", 43, 48)
-  print("press 🅾️ to start", 35, 80)
+  print("space  rescue", 43, 48)
+  print("press 🅾️ to start", 36, 82)
  elseif state == "game over" then
-  print("game over", 43, 48, 8)
-  print(game_over_message, 0, 80, 11)
+  print("game over", 45, 48, 8)
+  print(game_over_message, 0, 56, 11)
+  print("  press any button to try again", 0, 72, 7)
  else
   print("score: "..score, 7)
   if current_message then
