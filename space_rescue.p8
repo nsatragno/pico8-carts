@@ -1,6 +1,14 @@
 pico-8 cartridge // http://www.pico-8.com
 version 23
 __lua__
+-- centers a string by adding padding to it
+function center(string)
+ for i = 1, (31 - #string) / 2 do
+  string = " "..string
+ end
+ return string
+end
+
 function clamp(a)
  return flr(a * 8) / 8
 end
@@ -103,11 +111,11 @@ end
 
 function _init()
  game_over_messages = {
-  "     hahaha, git good scrub     ",
-  "         you suuuuuuuck         ",
-  "         git good, noob         ",
-  "           l2p  scrub           ",
-  "      get duuuuuuuunked on      ",
+  "hahaha, git good scrub",
+  "you suuuuuuuck",
+  "git good, noob",
+  "l2p  scrub",
+  "get duuuuuuuunked on",
  }
  astro_dead_messages = {
   "you're supposed to rescue them",
@@ -168,8 +176,8 @@ function start(difficulty)
  dy = 0
  a = 0
  s = 0
- camera_x = x - 64 + dx * 30
- camera_y = y - 64 + dy * 30
+ camera_x = x - 56 + dx * 30
+ camera_y = y - 56 + dy * 30
  fire = false
  parts = {}
  shots = {}
@@ -481,7 +489,8 @@ function _draw()
  camera_y = (y - 56 + camera_dy) * 0.05
           + (camera_y * 0.95)
  camera_x = flr(mid(0, camera_x, 1024 - 128))
- camera_y = flr(mid(0, camera_y, 512 - 128))
+ -- allow the camera to go up 8 pixels to make room for the HUD.
+ camera_y = flr(mid(-8, camera_y, 512 - 128))
 
  camera(camera_x, camera_y)
 
@@ -574,17 +583,21 @@ function _draw()
  -- draw the hud
  camera()
  if state == "menu" then
-  print("space  rescue", 43, 48)
-  print("press 🅾️ to start", 36, 82)
+  print(center("space  rescue"), 0, 44)
+  print(center("press 🅾️ to start"), 0, 76)
  elseif state == "game over" then
-  print("game over", 45, 48, 8)
-  print(game_over_message, 0, 56, 11)
-  print("     press 🅾️ to try again", 4, 72, 7)
+  print(center("game  over"), 0, 48, 8)
+  print(center("score: "..score), 0, 56, 11)
+  print(center(game_over_message), 0, 64, 11)
+  print(center("press 🅾️ to try again"), 0, 72, 7)
  else
-  print("score: "..score, 7)
+  rectfill(0, 0, 127, 8, 0)
   if current_message then
-   print(current_message, current_message_color)
+   print(current_message, 2, 2, current_message_color)
+  else
+   print("score: "..score, 2, 2, 7)
   end
+  rect(0, 0, 127, 8)
  end
 
 end
