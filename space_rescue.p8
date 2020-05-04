@@ -257,6 +257,15 @@ function _update60()
   end
  end
 
+ if state == "dead" then
+  time_death -= 1
+  if time_death <= 0 then
+   state = "game over"
+   sfx(1)
+   game_over_message = game_over_messages[flr(rnd(#game_over_messages)) + 1]
+  end
+ end
+
  if state == "menu" then
   if btnp(🅾️) then
    state = "alive"
@@ -271,6 +280,7 @@ function _update60()
   return
  end
 
+ -- control the player
  if state == "alive" then
   if btn(⬅️) then
     a -= .02
@@ -517,14 +527,7 @@ function _draw()
  if state == "alive" or state == "menu" then
   spr(a * 8 + 1, x, y)
  elseif state == "dead" then
-  time_death -= 1
-  if time_death > 0 then
-   spr(explosion_for(time_death), x, y)
-  elseif time_death == 0 then
-   state = "game over"
-   sfx(1)
-   game_over_message = game_over_messages[flr(rnd(#game_over_messages)) + 1]
-  end
+  spr(explosion_for(time_death), x, y)
  end
 
  -- draw the shots
