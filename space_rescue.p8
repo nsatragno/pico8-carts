@@ -174,10 +174,60 @@ function _init()
   "rocket maaaaaaaaaan!",
  }
  restart()
+ state = "intro"
+ intro_messages = {
+  {
+   x = 0,
+   y = 128,
+   dx = 0,
+   dy = -0.2,
+   text = center("it is the year 21xx"),
+   life = 800,
+  },
+  {
+   x = 0,
+   y = 148,
+   dx = 0,
+   dy = -0.2,
+   text = center("humans are losing the war"),
+   life = 800,
+  },
+  {
+   x = 0,
+   y = 168,
+   dx = 0,
+   dy = -0.2,
+   text = center("pilots of the 2nd galactic squad"),
+   life = 800,
+  },
+  {
+   x = 0,
+   y = 178,
+   dx = 0,
+   dy = -0.2,
+   text = center("are stranded"),
+   life = 800,
+  },
+  {
+   x = 0,
+   y = 198,
+   dx = 0,
+   dy = -0.2,
+   text = center("your mission:"),
+   life = 800,
+  },
+  {
+   x = 0,
+   y = 218,
+   dx = 0,
+   dy = -0.2,
+   text = center("space  rescue"),
+   life = 800,
+  },
+ }
 end
 
 function restart()
- state = "menu"
  stars = {}
  current_message = nil
  current_message_color = nil
@@ -281,7 +331,7 @@ end
 function _update60()
  -- global actions
 
- -- play the engine sfx
+ -- play / stop playing the engine sfx
  if state == "alive" then
   sfx(flr(20 + (s - 0.3) * 3), 0)
  else
@@ -327,6 +377,14 @@ function _update60()
    restart()
   end
   return
+ end
+
+ -- intro
+ if state == "intro" then
+  update(intro_messages)
+  if #intro_messages == 0 or btnp(🅾️) then
+   state = "menu"
+  end
  end
 
  -- actions when game is running
@@ -539,6 +597,14 @@ end
 function _draw()
  cls()
 
+ -- play the intro
+ if state == "intro" then
+  for message in all(intro_messages) do
+   print(message.text, message.x, message.y, 7)
+  end
+  return
+ end
+
  -- center the camera
  if state == "alive" then
   camera_dx = flr(mid(-60, dx * 70, 60))
@@ -670,7 +736,6 @@ function _draw()
   end
   rect(0, 0, 127, 8)
  end
-
 end
 __gfx__
 000000000800000000608800006006000088060000000080cc000000000cc000000000cc00677000000000000000000000000000000000000000000000000000
