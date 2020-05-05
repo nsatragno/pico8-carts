@@ -72,7 +72,7 @@ function update_kill(enemies, explodes)
   if colliding(
        enemy,
        { x = x, y = y}) and enemy.state != "dead" then
-   hp -= 1
+   hp -= enemy.dmg
    kill_enemy(enemy, explodes)
    if hp <= 0 then
     state = "dead"
@@ -233,7 +233,8 @@ function start()
                 y = c.y,
                 dx = rnd(1) - 0.5,
                 dy = rnd(1) - 0.5,
-                sp = flr(rnd(6)) + 16 }
+                sp = flr(rnd(6)) + 16,
+                dmg = 3 }
  end
 
  octopi = {}
@@ -243,7 +244,8 @@ function start()
                 y = c.y,
                 dx = rnd(0.3) - 0.15,
                 dy = rnd(0.3) - 0.15,
-                cd = 0 }
+                cd = 0,
+                dmg = 2 }
  end
 
  chompers = {}
@@ -256,7 +258,8 @@ function start()
                   dy = cos(a) * 0.25,
                   cd = 0,
                   state = "idle",
-                  speed = 0.25 }
+                  speed = 0.25,
+                  dmg = 3 }
  end
 
  eyes = {}
@@ -268,7 +271,8 @@ function start()
               dx = sin(a) * 0.1,
               dy = cos(a) * 0.1,
               cd = 0,
-              state = "idle" }
+              state = "idle",
+              dmg = 4 }
  end
 
  bullets = {}
@@ -405,7 +409,8 @@ function _update60()
      y = octopus.y,
      dx = v.dx,
      dy = v.dy,
-     life = 100
+     life = 100,
+     dmg = 2
     })
     octopus.cd = rnd(100) + 60
    elseif octopus.cd > 0 then
