@@ -137,7 +137,7 @@ function _init()
  }
  messages = {
   "i saw an alien eat a man whole",
-  "i thought i wasn't gonna make it",
+  "i thought i wasn't making it",
   "i'm glad you came for me",
   "it's too bad they didn't live",
   "i miss my girlfriend",
@@ -171,14 +171,27 @@ function restart()
  current_message_color = nil
  message_timer = 0
  for i = 1, rnd(700) + 300 do
+  local r = flr(rnd(4))
+  local color
+  if r == 0 then
+   color = 6
+  elseif r == 1 then
+   color = 7
+  elseif r == 2 then
+   color = 10
+  else
+   color = 15
+  end
   stars[i] = { x = rnd(1024),
-               y = rnd(512) }
+               y = rnd(512),
+               color = color }
  end
  score = 0
- start(1)
+ level = 1
+ start()
 end
 
-function start(difficulty)
+function start()
  x = 500
  dx = 0
  y = 250
@@ -192,7 +205,7 @@ function start(difficulty)
  shots = {}
 
  astros = {}
- for i = 1, 10 do
+ for i = 1, 2 + level * 3 do
   local c = spawn_coordinates(astros)
   astros[i] = { x = c.x,
                 y = c.y,
@@ -201,7 +214,7 @@ function start(difficulty)
  end
 
  debris = {}
- for i = 1, rnd(10) + 10 do
+ for i = 1, 6 + level * 3 do
   local c = spawn_coordinates(debris)
   debris[i] = { x = c.x,
                 y = c.y,
@@ -211,7 +224,7 @@ function start(difficulty)
  end
 
  octopi = {}
- for i = 1, rnd(5) + 5 do
+ for i = 1, 10 + level * 2 do
   local c = spawn_coordinates(octopi)
   octopi[i] = { x = c.x,
                 y = c.y,
@@ -221,7 +234,7 @@ function start(difficulty)
  end
 
  chompers = {}
- for i = 1, rnd(5) + 5 do
+ for i = 1, (level - 1) * 2 do
   local c = spawn_coordinates(chompers)
   local a = clamp(rnd(1))
   chompers[i] = { x = c.x,
@@ -234,7 +247,7 @@ function start(difficulty)
  end
 
  eyes = {}
- for i = 1, rnd(5) + 5 do
+ for i = 1, (level - 2) * 3 do
   local c = spawn_coordinates(eyes)
   local a = clamp(rnd(1))
   eyes[i] = { x = c.x,
@@ -249,6 +262,20 @@ function start(difficulty)
 end
 
 function _update60()
+ -- global actions
+
+ -- play the engine sfx
+ local sf = flr(20 + (s - 0.3) * 3)
+ for i = 20, 24 do
+  local channel
+  if sf == i and state == "alive" then
+   channel = -1
+  else
+   channel = -2
+  end
+  sfx(i, channel)
+ end
+
  if message_timer > 0 then
   message_timer -= 1
   if message_timer <= 0 then
@@ -264,10 +291,20 @@ function _update60()
    sfx(1)
    game_over_message = game_over_messages[flr(rnd(#game_over_messages)) + 1]
   end
+  return
  end
 
  if state == "menu" then
   if btnp(🅾️) then
+   state = "alive"
+  end
+  return
+ end
+
+ if state == "next level" then
+  if btnp(🅾️) then
+   level += 1
+   start()
    state = "alive"
   end
   return
@@ -279,6 +316,8 @@ function _update60()
   end
   return
  end
+
+ -- actions when game is running
 
  -- control the player
  if state == "alive" then
@@ -339,6 +378,10 @@ function _update60()
     current_message = messages[flr(rnd(#messages)) + 1]
     current_message_color = 12
     message_timer = 180
+    if #astros <= 0 then
+     state = "next level"
+     return
+    end
    end
   end
 
@@ -436,18 +479,6 @@ function _update60()
   end
  end  -- end if state == "alive"
 
- -- play the engine sfx
- local sf = flr(20 + (s - 0.3) * 3)
- for i = 20, 24 do
-  local channel
-  if sf == i and state == "alive" then
-   channel = -1
-  else
-   channel = -2
-  end
-  sfx(i, channel)
- end
-
  -- collide shots with debris
  for shot in all(shots) do
   for debri in all(debris) do
@@ -515,7 +546,7 @@ function _draw()
 
  -- draw the stars
  for star in all(stars) do
-  pset(star.x, star.y, 6)
+  pset(star.x, star.y, star.color)
  end
 
  -- draw the particles
@@ -524,7 +555,7 @@ function _draw()
  end
 
  -- draw the ship
- if state == "alive" or state == "menu" then
+ if state == "alive" or state == "menu" or state == "next level" then
   spr(a * 8 + 1, x, y)
  elseif state == "dead" then
   spr(explosion_for(time_death), x, y)
@@ -602,6 +633,10 @@ function _draw()
   print(center("score: "..pad(score, 5)), 0, 56, 11)
   print(center(game_over_message), 0, 64, 11)
   print(center("press 🅾️ to try again"), 0, 72, 7)
+ elseif state == "next level" then
+  print(center("level complete"), 0, 48, 8)
+  print(center("score: "..pad(score, 5)), 0, 56, 11)
+  print(center("press 🅾️ to continue"), 0, 72, 7)
  else
   rectfill(0, 0, 127, 8, 0)
   if current_message then
