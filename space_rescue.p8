@@ -54,31 +54,43 @@ function update(elements)
  end
 end
 
-function update_kill(enemies)
+function kill_enemy(enemy, explodes)
+ if explodes then
+  sfx(2, 1)
+  enemy.life = 54
+ else
+  sfx(24, 1)
+  enemy.life = 0
+ end
+ enemy.state = "dead"
+ enemy.dx = 0
+ enemy.dy = 0
+end
+
+function update_kill(enemies, explodes)
  for enemy in all(enemies) do
   if colliding(
        enemy,
-       { x = x, y = y}) then
-   state = "dead"
-   time_death = 54
-   del(enemies, enemy)
-   sfx(2)
+       { x = x, y = y}) and enemy.state != "dead" then
+   hp -= 1
+   kill_enemy(enemy, explodes)
+   if hp <= 0 then
+    state = "dead"
+    sfx(2, 1)
+    time_death = 54
+   end
   end
  end
 end
 
-function collide_enemies(enemies)
+function collide_enemies(enemies, explodes)
  for shot in all(shots) do
   for enemy in all(enemies) do
    if colliding(enemy, shot) and
       enemy.state != "dead" then
-    enemy.state = "dead"
-    enemy.life = 54
-    enemy.dx = 0
-    enemy.dy = 0
+    kill_enemy(enemy, explodes)
     score += 10
     del(shots, shot)
-    sfx(2)
    end
   end
  end
@@ -192,6 +204,7 @@ function restart()
 end
 
 function start()
+ hp = 8
  x = 500
  dx = 0
  y = 250
@@ -265,15 +278,10 @@ function _update60()
  -- global actions
 
  -- play the engine sfx
- local sf = flr(20 + (s - 0.3) * 3)
- for i = 20, 24 do
-  local channel
-  if sf == i and state == "alive" then
-   channel = -1
-  else
-   channel = -2
-  end
-  sfx(i, channel)
+ if state == "alive" then
+  sfx(flr(20 + (s - 0.3) * 3), 0)
+ else
+  sfx(-1, 0)
  end
 
  if message_timer > 0 then
@@ -288,7 +296,7 @@ function _update60()
   time_death -= 1
   if time_death <= 0 then
    state = "game over"
-   sfx(1)
+   sfx(1, 2)
    game_over_message = game_over_messages[flr(rnd(#game_over_messages)) + 1]
   end
   return
@@ -344,7 +352,7 @@ function _update60()
     dy = dy / l * 3,
     life = 64
    })
-   sfx(0)
+   sfx(0, 1)
   elseif not btn(🅾️) then
    fire = false
   end
@@ -374,7 +382,7 @@ function _update60()
       astro.state != "dead" then
     del(astros, astro)
     score += 100
-    sfx(3)
+    sfx(3, 2)
     current_message = messages[flr(rnd(#messages)) + 1]
     current_message_color = 12
     message_timer = 180
@@ -461,11 +469,11 @@ function _update60()
 
 
   -- collide with enemies
-  update_kill(debris)
-  update_kill(octopi)
-  update_kill(bullets)
-  update_kill(chompers)
-  update_kill(eyes)
+  update_kill(debris, true)
+  update_kill(octopi, true)
+  update_kill(bullets, false)
+  update_kill(chompers, true)
+  update_kill(eyes, true)
 
   -- maybe create a new particle
   if flr((time() * 1000) % 2) == 0 then
@@ -489,16 +497,16 @@ function _update60()
  end
 
  -- collide shots with enemies
- collide_enemies(octopi)
- collide_enemies(chompers)
- collide_enemies(eyes)
+ collide_enemies(octopi, true)
+ collide_enemies(chompers, true)
+ collide_enemies(eyes, true)
 
  -- collide shots with astronauts
  for shot in all(shots) do
   for astro in all(astros) do
   if colliding(astro, shot) and
      astro.state != "dead" then
-   sfx(2)
+   sfx(2, 1)
    astro.state = "dead"
    astro.life = 54
    astro.dx = 0
@@ -578,7 +586,12 @@ function _draw()
 
  -- draw the debris
  for debri in all(debris) do
-  spr(debri.sp, debri.x, debri.y)
+  if debri.state == "dead" then
+   sp = explosion_for(debri.life)
+  else
+   sp = debri.sp
+  end
+  spr(sp, debri.x, debri.y)
  end
 
  -- draw the octopi
@@ -643,6 +656,11 @@ function _draw()
    print(current_message, 2, 2, current_message_color)
   else
    print("p1 "..pad(score, 5), 2, 2, 7)
+   for i = 0, hp - 1 do
+    rectfill(46 + i * 4, 1,
+             48 + i * 4, 7,
+             8 + i \ 2)
+   end
    print("left: "..pad(#astros, 2), 95, 2, 7)
   end
   rect(0, 0, 127, 8)
@@ -708,6 +726,7 @@ __sfx__
 011000000062200622006220062201622026220262202622026220162201622016220162201622016220162201622006220062200622006220062201622016220262202622026220262202622036220362203622
 011000200063200632006320063201632026320263202632026320163201632016320163201632016320163201632006320063200632006320063201632016320263202632026320263202632036320363203632
 011000200064200642006420064201642026420264202642026420164201642016420164201642016420164201642006420064200642006420064201642016420264202642026420264202642036420364203642
+001400000345002400044000540000400044000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __music__
 00 07424340
 00 41424344
