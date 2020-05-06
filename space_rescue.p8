@@ -175,81 +175,41 @@ function _init()
  }
  restart()
  state = "intro"
+
  intro_messages = {
   {
-   x = 0,
-   y = 128,
-   dx = 0,
-   dy = -0.2,
    text = center("it is the year 21xx"),
-   life = 800,
+   delay = 0,
   },
   {
-   x = 0,
-   y = 148,
-   dx = 0,
-   dy = -0.2,
    text = center("humans are losing the war"),
-   life = 800,
+   delay = 2,
   },
   {
-   x = 0,
-   y = 168,
-   dx = 0,
-   dy = -0.2,
-   text = center("pilots of the 2nd galactic squad"),
-   life = 800,
+   text = center("pilots of the galactic squad"),
+   delay = 4,
   },
   {
-   x = 0,
-   y = 178,
-   dx = 0,
-   dy = -0.2,
    text = center("are stranded"),
-   life = 800,
+   delay = 5,
   },
   {
-   x = 0,
-   y = 198,
-   dx = 0,
-   dy = -0.2,
    text = center("your mission:"),
-   life = 800,
+   delay = 7.
   },
   {
-   x = 0,
-   y = 218,
-   dx = 0,
-   dy = -0.2,
    text = center("space  rescue"),
-   life = 800,
+   delay = 9,
   },
  }
 end
 
 function restart()
- stars = {}
  current_message = nil
  current_message_color = nil
  message_timer = 0
- for i = 1, rnd(700) + 300 do
-  local r = flr(rnd(4))
-  local color
-  if r == 0 then
-   color = 6
-  elseif r == 1 then
-   color = 7
-  elseif r == 2 then
-   color = 10
-  else
-   color = 15
-  end
-  stars[i] = { x = rnd(1024),
-               y = rnd(512),
-               color = color }
- end
  score = 0
- level = 1
+ level = 4
  state = "menu"
  start()
 end
@@ -267,6 +227,24 @@ function start()
  fire = false
  parts = {}
  shots = {}
+
+ stars = {}
+ for i = 1, rnd(700) + 300 do
+  local r = flr(rnd(4))
+  local color
+  if r == 0 then
+   color = 6
+  elseif r == 1 then
+   color = 7
+  elseif r == 2 then
+   color = 10
+  else
+   color = 15
+  end
+  stars[i] = { x = rnd(1024),
+               y = rnd(512),
+               color = color }
+ end
 
  astros = {}
  for i = 1, 2 + level * 3 do
@@ -382,8 +360,7 @@ function _update60()
 
  -- intro
  if state == "intro" then
-  update(intro_messages)
-  if #intro_messages == 0 or btnp(🅾️) then
+  if btnp(🅾️) then
    state = "menu"
   end
  end
@@ -596,13 +573,69 @@ function _update60()
  update(eyes)
 end
 
+function print_with_color_delay(string, color, delay)
+ local c
+ if time() > delay then
+  c = color
+ else
+  c = 7
+ end
+ print(string, 0, 27, c)
+end
+
+function print_menu(color)
+ print(center("press 🅾️ to start"), 0, 37, color)
+end
+
 function _draw()
  cls()
 
+ if state == "menu" then
+  print("         space  ", 0, 27, 8)
+  print("                rescue", 0, 27, 12)
+  print_menu(7)
+  return
+ end
+
  -- play the intro
  if state == "intro" then
-  for message in all(intro_messages) do
-   print(message.text, message.x, message.y, 7)
+  if #intro_messages <= 1 then
+   print_with_color_delay("         s", 8, 20)
+   print_with_color_delay("          p", 8, 20.1)
+   print_with_color_delay("           a", 8, 20.2)
+   print_with_color_delay("            c", 8, 20.3)
+   print_with_color_delay("             e", 8, 20.4)
+   print_with_color_delay("                r", 12, 20.5)
+   print_with_color_delay("                 e", 12, 20.6)
+   print_with_color_delay("                  s", 12, 20.7)
+   print_with_color_delay("                   c", 12, 20.8)
+   print_with_color_delay("                    u", 12, 20.9)
+   print_with_color_delay("                     e", 12, 21)
+   spr(1, (time() - 19.3) * 44, 37)
+
+   if time() > 24 then
+    state = "menu"
+   elseif time() > 23.5 then
+    print_menu(6)
+   elseif time() > 23 then
+    print_menu(5)
+   end
+  else
+   for message in all(intro_messages) do
+    local time_alive = (time() - message.delay) * 10
+    local color = 7
+    if time_alive > 120 then
+     del(intro_messages, message)
+     color = 0
+    elseif time_alive > 110 then
+     color = 5
+    elseif time_alive > 100 then
+     color = 6
+    else
+     color = 7
+    end
+    print(message.text, 0, 128 - time_alive, color)
+   end
   end
   return
  end
@@ -636,7 +669,7 @@ function _draw()
  end
 
  -- draw the ship
- if state == "alive" or state == "menu" or state == "next level" then
+ if state == "alive" or state == "next level" or state == "menu" then
   spr(a * 8 + 1, x, y)
  elseif state == "dead" then
   spr(explosion_for(time_death), x, y)
@@ -711,10 +744,7 @@ function _draw()
 
  -- draw the hud
  camera()
- if state == "menu" then
-  print(center("space  rescue"), 0, 44, 7)
-  print(center("press 🅾️ to start"), 0, 76, 7)
- elseif state == "game over" then
+ if state == "game over" then
   print(center("game  over"), 0, 48, 8)
   print(center("score: "..pad(score, 5)), 0, 56, 11)
   print(center(game_over_message), 0, 64, 11)
