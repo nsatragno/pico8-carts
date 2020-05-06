@@ -250,6 +250,7 @@ function restart()
  end
  score = 0
  level = 1
+ state = "menu"
  start()
 end
 
