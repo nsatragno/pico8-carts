@@ -519,7 +519,8 @@ function _update60()
        y = eye.y,
        dx = sin(i / 8),
        dy = cos(i / 8),
-       life = 100
+       life = 100,
+       dmg = 2
       })
      end
      eye.state = "idle"
