@@ -368,7 +368,18 @@ function _update60()
  -- actions when game is running
 
  -- control the player
- if state == "alive" then
+
+ -- radar controls
+ if state == "radar" then
+  if btnp(❎) then
+   state = "alive"
+  end
+
+ -- flight controls
+ elseif state == "alive" then
+  if btnp(❎) then
+   state = "radar"
+  end
   if btn(⬅️) then
     a -= .02
   end
@@ -396,6 +407,10 @@ function _update60()
   elseif not btn(🅾️) then
    fire = false
   end
+ end
+
+ if state == "alive" or state == "radar" then
+  -- move the ship
   s = mid(0.3, s, 1.3)
   if a >= 1 then a -= 1 end
   if a < 0 then a += 1 end
@@ -527,7 +542,7 @@ function _update60()
     life = flr(rnd(10) + 10)
    })
   end
- end  -- end if state == "alive"
+ end  -- end if state == "alive" or state == "radar"
 
  -- collide shots with debris
  for shot in all(shots) do
@@ -587,6 +602,14 @@ function print_menu(color)
  print(center("press 🅾️ to start"), 0, 37, color)
 end
 
+function radar_x(x)
+ return x / 9.6 + 9
+end
+
+function radar_y(y)
+ return y / 9.6 + 38
+end
+
 function _draw()
  cls()
 
@@ -594,6 +617,18 @@ function _draw()
   print("         space  ", 0, 27, 8)
   print("                rescue", 0, 27, 12)
   print_menu(7)
+  return
+ end
+
+ -- draw the radar
+ if state == "radar" then
+  rect(8, 37, 117, 90, 7)
+  for astro in all(astros) do
+   pset(radar_x(astro.x), radar_y(astro.y), 7)
+  end
+  if flr(time() * 3) % 2 == 0 then
+   pset(radar_x(x), radar_y(y), 10)
+  end
   return
  end
 
