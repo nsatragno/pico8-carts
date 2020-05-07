@@ -229,7 +229,7 @@ function start()
  shots = {}
 
  stars = {}
- for i = 1, rnd(700) + 300 do
+ for i = 1, 300 do
   local r = flr(rnd(4))
   local color
   if r == 0 then
@@ -450,20 +450,20 @@ function _update60()
 
   -- have some octopi fire
   for octopus in all(octopi) do
-   if abs(octopus.x - x) <= 40 and
-      abs(octopus.y - y) <= 40 and
+   if abs(octopus.x - x) <= 50 and
+      abs(octopus.y - y) <= 50 and
       octopus.state != "dead" and
       octopus.cd <= 0 then
     local v = vector_to_player(octopus)
     add(bullets, {
      x = octopus.x,
      y = octopus.y,
-     dx = v.dx,
-     dy = v.dy,
+     dx = v.dx * 1.2 + dx,
+     dy = v.dy * 1.2 + dy,
      life = 100,
      dmg = 2
     })
-    octopus.cd = rnd(100) + 60
+    octopus.cd = rnd(40) + 50
    elseif octopus.cd > 0 then
     octopus.cd -= 1
    end
