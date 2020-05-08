@@ -22,11 +22,13 @@ function clamp(a)
  return flr(a * 8) / 8
 end
 
+function normalize(x, y)
+ local l = sqrt(x * x + y * y)
+ return { x = x / l, y = y / l }
+end
+
 function vector_to_player(element)
- local bdx = x - element.x
- local bdy = y - element.y
- local l = sqrt(bdx * bdx + bdy * bdy)
- return { dx = bdx / l, dy = bdy / l }
+ return normalize(x - element.x, y - element.y)
 end
 
 function update(elements)
@@ -267,7 +269,8 @@ function start()
  end
 
  octopi = {}
- for i = 1, 10 + level * 2 do
+ --for i = 1, 10 + level * 2 do
+ for i = 1, 100 + level * 2 do
   local c = spawn_coordinates(octopi)
   octopi[i] = { x = c.x,
                 y = c.y,
@@ -306,7 +309,7 @@ function start()
 
  lookouts = {}
  missiles = {}
- for i = 1, 20 do
+ for i = 1, (level - 2) * 2 do
    local c = spawn_coordinates(lookouts)
    lookouts[i] = { x = c.x,
                    y = c.y,
@@ -485,8 +488,8 @@ function _update60()
     add(bullets, {
      x = octopus.x,
      y = octopus.y,
-     dx = v.dx * 1.2 + dx,
-     dy = v.dy * 1.2 + dy,
+     dx = v.x * 1.2,
+     dy = v.y * 1.2,
      life = 100,
      dmg = 2
     })
@@ -502,7 +505,7 @@ function _update60()
       abs(chomper.y - y) <= 40 and
       chomper.state != "dead" then
     local v = vector_to_player(chomper)
-    local a = clamp(atan2(v.dx, v.dy))
+    local a = clamp(atan2(v.x, v.y))
     chomper.dx = cos(a) * chomper.speed
     chomper.dy = sin(a) * chomper.speed
     if chomper.state == "idle" then
@@ -554,7 +557,7 @@ function _update60()
   -- make lookouts fire their missiles
   for lookout in all(lookouts) do
    local v = vector_to_player(lookout)
-   lookout.a = clamp(atan2(v.dx, -v.dy))
+   lookout.a = clamp(atan2(v.x, -v.y))
    if abs(lookout.x - x) <= 50 and
       abs(lookout.y - y) <= 50 and
       lookout.state == "charged" then
@@ -588,7 +591,7 @@ function _update60()
      missile.speed = max(0.05, missile.speed - 0.01)
     else
      local v = vector_to_player(missile)
-     missile.a = clamp(atan2(v.dx, v.dy))
+     missile.a = clamp(atan2(v.x, v.y))
      missile.speed = min(1.32, missile.speed + 0.0025)
      particle_for(missile.x, missile.y, missile.dx, missile.dy, 11)
     end
