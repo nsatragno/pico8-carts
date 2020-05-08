@@ -58,10 +58,10 @@ end
 
 function kill_enemy(enemy, explodes)
  if explodes then
-  sfx(2, 1)
+  sfx(2)
   enemy.life = 54
  else
-  sfx(24, 1)
+  sfx(24)
   enemy.life = 0
  end
  enemy.state = "dead"
@@ -78,7 +78,7 @@ function update_kill(enemies, explodes)
    kill_enemy(enemy, explodes)
    if hp <= 0 then
     state = "dead"
-    sfx(2, 1)
+    sfx(2)
     time_death = 54
    end
   end
@@ -372,7 +372,7 @@ function _update60()
   time_death -= 1
   if time_death <= 0 then
    state = "game over"
-   sfx(1, 2)
+   sfx(1)
    game_over_message = game_over_messages[flr(rnd(#game_over_messages)) + 1]
   end
   return
@@ -446,7 +446,7 @@ function _update60()
     dy = dy / l * 3,
     life = 64
    })
-   sfx(0, 1)
+   sfx(0)
   elseif not btn(🅾️) then
    fire = false
   end
@@ -480,7 +480,7 @@ function _update60()
       astro.state != "dead" then
     del(astros, astro)
     score += 100
-    sfx(3, 2)
+    sfx(3)
     current_message = messages[flr(rnd(#messages)) + 1]
     current_message_color = 12
     message_timer = 180
@@ -499,7 +499,7 @@ function _update60()
       healthpack.state != "dead" then
     del(healthpacks, healthpack)
     hp = 8
-    sfx(3, 2)
+    sfx(3)
    end
   end
 
@@ -611,7 +611,7 @@ function _update60()
     if missile.life <= 1 then
      missile.state = "dead"
      missile.life = 54
-     sfx(2, 1)
+     sfx(2)
     elseif missile.life <= 150 then
      missile.speed = max(0.05, missile.speed - 0.01)
     else
@@ -660,7 +660,7 @@ function _update60()
   for astro in all(astros) do
   if colliding(astro, shot) and
      astro.state != "dead" then
-   sfx(2, 1)
+   sfx(2)
    astro.state = "dead"
    astro.life = 54
    astro.dx = 0
