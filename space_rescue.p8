@@ -313,16 +313,26 @@ function start()
  missiles = {}
  for i = 1, 10 do
  --for i = 1, (level - 2) * 2 do
-   local c = spawn_coordinates(lookouts)
-   lookouts[i] = { x = c.x,
-                   y = c.y,
-                   dx = rnd(0.3) - 0.15,
-                   dy = rnd(0.3) - 0.15,
-                   cd = 0,
-                   dmg = 2,
-                   state = "charged",
-                   a = 0 }
+  local c = spawn_coordinates(lookouts)
+  lookouts[i] = { x = c.x,
+                  y = c.y,
+                  dx = rnd(0.3) - 0.15,
+                  dy = rnd(0.3) - 0.15,
+                  cd = 0,
+                  dmg = 2,
+                  state = "charged",
+                  a = 0 }
  end
+
+ healthpacks = {}
+ for i = 1, rnd(3) + 1 do
+  local c = spawn_coordinates(lookouts)
+  healthpacks[i] = { x = c.x,
+                     y = c.y,
+                     dx = 0,
+                     dy = 0 }
+ end
+
 
  bullets = {}
 end
@@ -466,7 +476,7 @@ function _update60()
   for astro in all(astros) do
    if colliding(
         astro,
-        { x = x, y = y}) and
+        { x = x, y = y }) and
       astro.state != "dead" then
     del(astros, astro)
     score += 100
@@ -478,6 +488,18 @@ function _update60()
      state = "next level"
      return
     end
+   end
+  end
+
+  -- get healthpacks
+  for healthpack in all(healthpacks) do
+   if colliding(
+        healthpack,
+        { x = x, y = y }) and
+      healthpack.state != "dead" then
+    del(healthpacks, healthpack)
+    hp = 8
+    sfx(3, 2)
    end
   end
 
@@ -631,6 +653,7 @@ function _update60()
  collide_enemies(eyes, true)
  collide_enemies(lookouts, true)
  collide_enemies(missiles, true)
+ collide_enemies(healthpacks, true)
 
  -- collide shots with astronauts
  for shot in all(shots) do
@@ -701,6 +724,9 @@ function _draw()
   rect(8, 37, 117, 90, 7)
   for astro in all(astros) do
    pset(radar_x(astro.x), radar_y(astro.y), 7)
+  end
+  for healthpack in all(healthpacks) do
+   pset(radar_x(healthpack.x), radar_y(healthpack.y), 12)
   end
   if flr(time() * 3) % 2 == 0 then
    pset(radar_x(x), radar_y(y), 10)
@@ -799,6 +825,16 @@ function _draw()
    sp = 9
   end
   spr(sp, astro.x, astro.y)
+ end
+
+ -- draw the healthpacks
+ for healthpack in all(healthpacks) do
+  if healthpack.state == "dead" then
+   sp = explosion_for(healthpack.life)
+  else
+   sp = 43
+  end
+  spr(sp, healthpack.x, healthpack.y)
  end
 
  -- draw the debris
