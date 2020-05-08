@@ -278,8 +278,7 @@ function start()
  end
 
  chompers = {}
- --for i = 1, (level - 1) * 2 do
- for i = 1, 100 do
+ for i = 1, (level - 1) * 2 do
   local c = spawn_coordinates(chompers)
   local a = clamp(rnd(1))
   chompers[i] = { x = c.x,
@@ -320,6 +319,19 @@ function start()
  end
 
  bullets = {}
+end
+
+function particle_for(x, y, dx, dy, color)
+ if flr((time() * 1000) % 2) == 0 then
+  add(parts, {
+   x = x - dx + 4,
+   y = y - dy + 4,
+   dx = -dx + rnd(.6) - .3,
+   dy = -dy + rnd(.6) - .3,
+   life = flr(rnd(10) + 10),
+   color = color,
+  })
+ end
 end
 
 function _update60()
@@ -542,7 +554,7 @@ function _update60()
   -- make lookouts fire their missiles
   for lookout in all(lookouts) do
    local v = vector_to_player(lookout)
-   lookout.a = atan2(v.dx, v.dy)
+   lookout.a = clamp(atan2(v.dx, -v.dy))
    if abs(lookout.x - x) <= 50 and
       abs(lookout.y - y) <= 50 and
       lookout.state == "charged" then
@@ -550,17 +562,38 @@ function _update60()
     add(missiles, {
      x = lookout.x,
      y = lookout.y,
-     dx = cos(lookout.a) * 0.25,
-     dy = sin(lookout.a) * 0.25,
-     life = 100,
+     dx = 0,
+     dy = 0,
+     life = 650,
      dmg = 4,
+     speed = 0.15,
     })
-    lookout.cd = 120
+    lookout.cd = 400
    elseif lookout.state == "charging" and lookout.cd >= 0 then
     lookout.cd -= 1
     if lookout.cd <= 0 then
      lookout.state = "charged"
     end
+   end
+  end
+
+  -- update missiles
+  for missile in all(missiles) do
+   if missile.state != "dead" then
+    if missile.life <= 1 then
+     missile.state = "dead"
+     missile.life = 54
+     sfx(2, 1)
+    elseif missile.life <= 150 then
+     missile.speed = max(0.05, missile.speed - 0.01)
+    else
+     local v = vector_to_player(missile)
+     missile.a = clamp(atan2(v.dx, v.dy))
+     missile.speed = min(1.32, missile.speed + 0.0025)
+     particle_for(missile.x, missile.y, missile.dx, missile.dy, 11)
+    end
+    missile.dx = cos(missile.a) * missile.speed
+    missile.dy = sin(missile.a) * missile.speed
    end
   end
 
@@ -574,15 +607,7 @@ function _update60()
   update_kill(missiles, true)
 
   -- maybe create a new particle
-  if flr((time() * 1000) % 2) == 0 then
-   add(parts, {
-    x = x - dx + 4,
-    y = y - dy + 4,
-    dx = -dx + rnd(.6) - .3,
-    dy = -dy + rnd(.6) - .3,
-    life = flr(rnd(10) + 10)
-   })
-  end
+  particle_for(x, y, dx, dy, 9)
  end  -- end if state == "alive" or state == "radar"
 
  -- collide shots with debris
@@ -745,7 +770,7 @@ function _draw()
 
  -- draw the particles
  for part in all(parts) do
-  pset(part.x, part.y, 9)
+  pset(part.x, part.y, part.color)
  end
 
  -- draw the ship
@@ -825,13 +850,17 @@ function _draw()
   end
   spr(sp, lookout.x, lookout.y)
   if lookout.state == "charged" then
-   spr(64 + lookout.a * 8, lookout.x, lookout.y)
+   spr(80 + lookout.a * 8, lookout.x, lookout.y)
   end
  end
 
  -- draw the missiles
  for missile in all(missiles) do
-  sp = 64 + atan2(missile.dx, -missile.dy) * 8
+  if missile.state == "dead" then
+   sp = explosion_for(missile.life)
+  else
+   sp = 80 + atan2(missile.dx, -missile.dy) * 8
+  end
   spr(sp, missile.x, missile.y)
  end
 
@@ -909,14 +938,14 @@ b00b000b002bb3000002bb00003b3b00003b330003b3b30000a3b300033a0a30003b3a0000bbb300
 03330000300a0000a000aba0a22a000002233220022ab220022ba220032333200233323002233220022ab220022ba220303a3a0300333a000000000000000000
 00333000a000000000000000b22b0000003333000033330000333300003333000033330000333300003333000033330030000003330000330000000000000000
 0000a00000000000000000000ab00000000330000003300000033000000330000003300000033000000330000003300000000000000000000000000000000000
-00000000000a000000a00a000000a000000000000ba00000000ab000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000a00000000ba00000000a0000000000a22b000000b22a00000000000000000000000000000000000000000000000000000000000000000000000000
-a000bab00aba0000000ab0000000aba00bab000ab22a000000a22b00000000000000000000000000000000000000000000000000000000000000000000000000
-0baba22aa0aba000000ba000000aba0aa22abab00baba00000baba00000000000000000000000000000000000000000000000000000000000000000000000000
-0abab22b000abab000baba000baba000b22baba0000aba0a000ba000000000000000000000000000000000000000000000000000000000000000000000000000
-a000aba00000a22b00a22b00a22a00000aba000a0000aba0000ab000000000000000000000000000000000000000000000000000000000000000000000000000
-000000000000b22a00b22a00b22b00000000000000000a00000ba000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000000ab0000ab0000ab00000000000000000a00000a00a00000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000a000000a00a000000a000000000000ba00000000ab00000000ba00000000000000000000000000000000000000000000000000000000000000000
+0000000000a00000000ba00000000a0000000000a22b000000b22a000000b22b0000000000000000000000000000000000000000000000000000000000000000
+a000bab00aba0000000ab0000000aba00bab000ab22a000000a22b000000a22a0000000000000000000000000000000000000000000000000000000000000000
+0baba22aa0aba000000ba000000aba0aa22abab00baba00000baba00000abab00000000000000000000000000000000000000000000000000000000000000000
+0abab22b000abab000baba000baba000b22baba0000aba0a000ba000a0aba0000000000000000000000000000000000000000000000000000000000000000000
+a000aba00000a22b00a22b00a22a00000aba000a0000aba0000ab0000aba00000000000000000000000000000000000000000000000000000000000000000000
+000000000000b22a00b22a00b22b00000000000000000a00000ba00000a000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000ab0000ab0000ab00000000000000000a00000a00a00000a00000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
