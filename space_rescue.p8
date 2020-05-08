@@ -270,7 +270,7 @@ function start()
 
  octopi = {}
  --for i = 1, 10 + level * 2 do
- for i = 1, 100 + level * 2 do
+ for i = 1, 10 + level * 2 do
   local c = spawn_coordinates(octopi)
   octopi[i] = { x = c.x,
                 y = c.y,
@@ -281,7 +281,8 @@ function start()
  end
 
  chompers = {}
- for i = 1, (level - 1) * 2 do
+ for i = 1, 10 do
+ --for i = 1, (level - 1) * 2 do
   local c = spawn_coordinates(chompers)
   local a = clamp(rnd(1))
   chompers[i] = { x = c.x,
@@ -295,7 +296,8 @@ function start()
  end
 
  eyes = {}
- for i = 1, (level - 2) * 3 do
+ for i = 1, 10 do
+ --for i = 1, (level - 2) * 3 do
   local c = spawn_coordinates(eyes)
   local a = clamp(rnd(1))
   eyes[i] = { x = c.x,
@@ -309,7 +311,8 @@ function start()
 
  lookouts = {}
  missiles = {}
- for i = 1, (level - 2) * 2 do
+ for i = 1, 10 do
+ --for i = 1, (level - 2) * 2 do
    local c = spawn_coordinates(lookouts)
    lookouts[i] = { x = c.x,
                    y = c.y,
