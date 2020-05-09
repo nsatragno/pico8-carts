@@ -284,7 +284,7 @@ function start()
  end
 
  chompers = {}
- for i = 1, 10 do
+ for i = 1, 0 do
  --for i = 1, (level - 1) * 2 do
   local c = spawn_coordinates(chompers)
   local a = clamp(rnd(1))
@@ -299,7 +299,7 @@ function start()
  end
 
  eyes = {}
- for i = 1, 10 do
+ for i = 1, 0 do
  --for i = 1, (level - 2) * 3 do
   local c = spawn_coordinates(eyes)
   local a = clamp(rnd(1))
@@ -314,7 +314,7 @@ function start()
 
  lookouts = {}
  missiles = {}
- for i = 1, 10 do
+ for i = 1, 0 do
  --for i = 1, (level - 2) * 2 do
   local c = spawn_coordinates(lookouts)
   lookouts[i] = { x = c.x,
@@ -325,6 +325,20 @@ function start()
                   dmg = 2,
                   state = "charged",
                   a = 0 }
+ end
+
+ shells = {}
+ for i = 1, 30 do
+ --for i = 1, (level - 3) * 2 do
+  local c = spawn_coordinates(shells)
+  shells[i] = { x = c.x,
+                y = c.y,
+                dx = rnd(0.06) - 0.03,
+                dy = rnd(0.06) - 0.03,
+                cd = 10,
+                dmg = 3,
+                bullets_fired = 0,
+                state = "closed" }
  end
 
  healthpacks = {}
@@ -624,6 +638,55 @@ function _update60()
    end
   end
 
+  -- make shells fire
+  for shell in all(shells) do
+   if shell.cd > 0 then
+    shell.cd -= 1
+   end
+
+   if shell.state != "dead" then
+    if abs(shell.x - x) <= 50 and
+       abs(shell.y - y) <= 50 and
+       shell.cd <= 0 and
+       shell.state == "closed" then
+     shell.bullets_fired = 0
+     shell.state = "open"
+     shell.cd = min(shell.cd, 20)
+    elseif abs(shell.x - x) >= 50 and
+           abs(shell.y - y) >= 50 and
+           shell.state == "open" then
+     shell.state = "closed"
+    elseif shell.state == "open" and
+           shell.bullets_fired <= 24 and
+           shell.cd <= 0 then
+     shell.bullets_fired += 1
+     if shell.bullets_fired > 24 then
+      shell.cd = 200
+     else
+      shell.cd = 5
+     end
+     local v = vector_to_player(shell)
+     local angle_diff = (shell.bullets_fired - 6) / 8
+     local dv = normalize(v.x + sin(angle_diff) * 0.3,
+                          v.y + cos(angle_diff) * 0.3)
+     add(bullets, {
+      x = shell.x,
+      y = shell.y,
+      dx = dv.x * 1.2,
+      dy = dv.y * 1.2,
+      life = 100,
+      dmg = 1
+     })
+    elseif shell.state == "open" and
+           shell.cd <= 0 and
+           shell.bullets_fired > 24 then
+     shell.bullets_fired = 0
+     shell.state = "closed"
+     shell.cd = 300
+    end
+   end
+  end
+
   -- collide with enemies
   update_kill(debris, true)
   update_kill(octopi, true)
@@ -632,6 +695,7 @@ function _update60()
   update_kill(eyes, true)
   update_kill(lookouts, true)
   update_kill(missiles, true)
+  update_kill(shells, true)
 
   -- maybe create a new particle
   particle_for(x, y, dx, dy, 9)
@@ -646,6 +710,15 @@ function _update60()
   end
  end
 
+ -- collide shots with closed shells
+ for shot in all(shots) do
+  for shell in all(shells) do
+  if colliding(shell, shot) and shell.state == "closed" then
+   del(shots, shot)
+   end
+  end
+ end
+
  -- collide shots with enemies
  collide_enemies(octopi, true)
  collide_enemies(chompers, true)
@@ -653,6 +726,14 @@ function _update60()
  collide_enemies(lookouts, true)
  collide_enemies(missiles, true)
  collide_enemies(healthpacks, true)
+
+ local open_shells = {}
+ for shell in all(shells) do
+  if shell.state == "open" then
+   add(open_shells, shell)
+  end
+ end
+ collide_enemies(open_shells, true)
 
  -- collide shots with astronauts
  for shot in all(shots) do
@@ -684,6 +765,7 @@ function _update60()
  update(eyes)
  update(lookouts)
  update(missiles)
+ update(shells)
 end
 
 function print_with_color_delay(string, color, delay)
@@ -895,6 +977,18 @@ function _draw()
   if lookout.state == "charged" then
    spr(80 + lookout.a * 8, lookout.x, lookout.y)
   end
+ end
+
+ -- draw the shells
+ for shell in all(shells) do
+  if shell.state == "dead" then
+   sp = explosion_for(shell.life)
+  elseif shell.state == "closed" then
+   sp = 77
+  else
+   sp = 76
+  end
+  spr(sp, shell.x, shell.y)
  end
 
  -- draw the missiles
