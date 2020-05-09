@@ -133,6 +133,8 @@ function spawn_coordinates(list)
 end
 
 function _init()
+ -- reserve channels 2 for engine sfx and 3 for music
+ music(-1, 0, 12)
  game_over_messages = {
   "hahaha, git good scrub",
   "you suuuuuuuck",
@@ -355,9 +357,9 @@ function _update60()
 
  -- play / stop playing the engine sfx
  if state == "alive" then
-  sfx(flr(20 + (s - 0.3) * 3), 0)
+  sfx(flr(20 + (s - 0.3) * 3), 2)
  else
-  sfx(-1, 0)
+  sfx(-1, 2)
  end
 
  if message_timer > 0 then
