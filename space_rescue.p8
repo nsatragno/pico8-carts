@@ -35,15 +35,15 @@ function update(elements)
  for element in all(elements) do
   element.x += element.dx
   element.y += element.dy
-  if element.x >= 1023 then
+  if element.x > map_width then
    element.x = 0
   elseif element.x < 0 then
-   element.x = 1023
+   element.x = map_width - 1
   end
-  if element.y >= 511 then
+  if element.y > map_height then
    element.y = 0
   elseif element.x < 0 then
-   element.y = 511
+   element.y = map_height - 1
   end
 
 
@@ -74,7 +74,7 @@ function update_kill(enemies, explodes)
   if colliding(
        enemy,
        { x = x, y = y}) and enemy.state != "dead" then
-   hp -= enemy.dmg
+   --hp -= enemy.dmg
    kill_enemy(enemy, explodes)
    if hp <= 0 then
     state = "dead"
@@ -113,11 +113,11 @@ end
 function spawn_coordinates(list)
  local loops = 0
  while true do
-  local nx = rnd(900) + 50
-  local ny = rnd(400) + 50
+  local nx = rnd(map_width - 20) + 10
+  local ny = rnd(map_height - 20) + 10
 
-  if abs(nx - x) >= 64 and
-     abs(ny - y) >= 64 then
+  if abs(nx - x) >= map_width / 16 and
+     abs(ny - y) >= map_height / 16 then
    if loops > 1000 then return { x = nx, y = ny } end
    local good = true
    for element in all(list) do
@@ -220,21 +220,24 @@ function restart()
 end
 
 function start()
+ map_width = 256
+ map_height = 128
  hp = 8
- x = 500
+ x = map_width / 2
  dx = 0
- y = 250
+ y = map_height / 2
  dy = 0
  a = 0
  s = 0
  camera_x = x - 56 + dx * 30
  camera_y = y - 56 + dy * 30
  fire = false
+
  parts = {}
  shots = {}
 
  stars = {}
- for i = 1, 300 do
+ for i = 1, map_height / 100 * map_width / 10 do
   local r = flr(rnd(4))
   local color
   if r == 0 then
@@ -246,13 +249,14 @@ function start()
   else
    color = 15
   end
-  stars[i] = { x = rnd(1024),
-               y = rnd(512),
+  stars[i] = { x = rnd(map_width),
+               y = rnd(map_height),
                color = color }
  end
 
  astros = {}
  for i = 1, 2 + level * 3 do
+ --for i = 1, 0 do
   local c = spawn_coordinates(astros)
   astros[i] = { x = c.x,
                 y = c.y,
@@ -261,7 +265,8 @@ function start()
  end
 
  debris = {}
- for i = 1, 6 + level * 3 do
+ --for i = 1, 6 + level * 3 do
+ for i = 1, 0 do
   local c = spawn_coordinates(debris)
   debris[i] = { x = c.x,
                 y = c.y,
@@ -273,7 +278,7 @@ function start()
 
  octopi = {}
  --for i = 1, 10 + level * 2 do
- for i = 1, 10 + level * 2 do
+ for i = 1, 0 do
   local c = spawn_coordinates(octopi)
   octopi[i] = { x = c.x,
                 y = c.y,
@@ -328,7 +333,7 @@ function start()
  end
 
  shells = {}
- for i = 1, 30 do
+ for i = 1, 0 do
  --for i = 1, (level - 3) * 2 do
   local c = spawn_coordinates(shells)
   shells[i] = { x = c.x,
@@ -473,15 +478,15 @@ function _update60()
   dy = cos(clamp(a) - .25) * s
   x += dx
   y += dy
-  if x >= 1084 then
+  if x >= map_width + 40 then
    x = -60
   elseif x < -60 then
-   x = 1084
+   x = map_width + 40
   end
-  if y >= 572 then
+  if y >= map_height + 40 then
    y = -60
   elseif y < -60 then
-   y = 572
+   y = map_height + 40
   end
 
   -- rescue astronauts
@@ -783,11 +788,11 @@ function print_menu(color)
 end
 
 function radar_x(x)
- return x / 9.6 + 9
+ return x / (map_width / 112) + 9
 end
 
 function radar_y(y)
- return y / 9.6 + 38
+ return y / (map_height / 56) + 33
 end
 
 function _draw()
@@ -855,9 +860,9 @@ function _draw()
           + (camera_x * 0.95)
  camera_y = (y - 56 + camera_dy) * 0.05
           + (camera_y * 0.95)
- camera_x = flr(mid(0, camera_x, 1024 - 128))
+ camera_x = flr(mid(0, camera_x, map_width - 128))
  -- allow the camera to go up 8 pixels to make room for the HUD.
- camera_y = flr(mid(-8, camera_y, 512 - 128))
+ camera_y = flr(mid(-8, camera_y, map_height - 128))
 
  camera(camera_x, camera_y)
 
