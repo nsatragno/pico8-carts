@@ -52,15 +52,18 @@ function update(elements)
  for element in all(elements) do
   element.x += element.dx
   element.y += element.dy
-  if element.x > map_width + 4 then
-   element.x = -3
-  elseif element.x < -4 then
-   element.x = map_width - 3
-  end
-  if element.y > map_height then
-   element.y = -3
-  elseif element.y < -4 then
-   element.y = map_height - 3
+
+  if element.loops then
+   if element.x > map_width + 4 then
+    element.x = -3
+   elseif element.x < -4 then
+    element.x = map_width - 3
+   end
+   if element.y > map_height then
+    element.y = -3
+   elseif element.y < -4 then
+    element.y = map_height - 3
+   end
   end
 
 
@@ -283,7 +286,8 @@ function start()
   astros[i] = { x = c.x,
                 y = c.y,
                 dx = 0,
-                dy = 0 }
+                dy = 0,
+                loops = true, }
  end
 
  debris = {}
@@ -295,7 +299,8 @@ function start()
                 dx = rnd(1) - 0.5,
                 dy = rnd(1) - 0.5,
                 sp = flr(rnd(6)) + 16,
-                dmg = 3 }
+                dmg = 3,
+                loops = true }
  end
 
  octopi = {}
@@ -307,7 +312,8 @@ function start()
                 dx = rnd(0.3) - 0.15,
                 dy = rnd(0.3) - 0.15,
                 cd = 0,
-                dmg = 2 }
+                dmg = 2,
+                loops = true }
  end
 
  chompers = {}
@@ -322,7 +328,8 @@ function start()
                   cd = 0,
                   state = "idle",
                   speed = 0.25,
-                  dmg = 3 }
+                  dmg = 3,
+                  loops = true }
  end
 
  eyes = {}
@@ -336,7 +343,8 @@ function start()
               dy = cos(a) * 0.1,
               cd = 0,
               state = "idle",
-              dmg = 4 }
+              dmg = 4,
+              loops = true }
  end
 
  lookouts = {}
@@ -351,7 +359,8 @@ function start()
                   cd = 0,
                   dmg = 2,
                   state = "charged",
-                  a = 0 }
+                  a = 0,
+                  loops = true }
  end
 
  shells = {}
@@ -365,7 +374,8 @@ function start()
                 cd = 10,
                 dmg = 3,
                 bullets_fired = 0,
-                state = "closed" }
+                state = "closed",
+                loops = true }
  end
 
  healthpacks = {}
@@ -374,7 +384,8 @@ function start()
   healthpacks[i] = { x = c.x,
                      y = c.y,
                      dx = 0,
-                     dy = 0 }
+                     dy = 0,
+                     loops = true }
  end
 
  boss = {
@@ -392,6 +403,8 @@ function start()
   shots_fired = 0,
   explosions = {},
   astros = {},
+  flames = {},
+  loops = false,
  }
 
 
@@ -407,6 +420,7 @@ function particle_for(x, y, dx, dy, color)
    dy = -dy + rnd(.6) - .3,
    life = flr(rnd(10) + 10),
    color = color,
+   loops = false,
   })
  end
 end
@@ -501,7 +515,8 @@ function _update60()
     y = y + 4,
     dx = dx / l * 3,
     dy = dy / l * 3,
-    life = 15
+    life = 20,
+    loops = false,
    })
    sfx(0)
   elseif not btn(🅾️) then
@@ -574,7 +589,8 @@ function _update60()
      dx = v.x * 1.2,
      dy = v.y * 1.2,
      life = 100,
-     dmg = 2
+     dmg = 2,
+     loops = false,
     })
     octopus.cd = rnd(40) + 50
    elseif octopus.cd > 0 then
@@ -625,7 +641,8 @@ function _update60()
        dx = sin(i / 8),
        dy = cos(i / 8),
        life = 100,
-       dmg = 2
+       dmg = 2,
+       loops = false,
       })
      end
      eye.state = "idle"
@@ -653,6 +670,7 @@ function _update60()
      life = 650,
      dmg = 4,
      speed = 0.15,
+     loops = false,
     })
     lookout.cd = 400
    elseif lookout.state == "charging" and lookout.cd >= 0 then
@@ -720,7 +738,8 @@ function _update60()
       dx = dv.x * 1.2,
       dy = dv.y * 1.2,
       life = 100,
-      dmg = 1
+      dmg = 1,
+      loops = false,
      })
     elseif shell.state == "open" and
            shell.cd <= 0 and
@@ -768,10 +787,11 @@ function _update60()
  if boss then
   -- update all the boss' elements
   update(boss.explosions)
-
   update(boss.astros)
   update_kill(boss.astros, true)
   collide_enemies(boss.astros, true)
+  update(boss.flames)
+  update_kill(boss.flames, false)
 
   for astro in all(boss.astros) do
    if astro.state != "dead" then
@@ -785,7 +805,8 @@ function _update60()
        dx = sin(i / 8),
        dy = cos(i / 8),
        life = 60,
-       dmg = 2
+       dmg = 2,
+       loops = false,
       })
      end
     end
@@ -802,6 +823,7 @@ function _update60()
      y = boss.y + rnd(16),
      dx = 0,
      dy = 0,
+     loops = false,
     })
    else
     boss.state = "dead"
@@ -837,7 +859,8 @@ function _update60()
      dy = dv.y * 0.5,
      life = 90,
      dmg = 3,
-     seed = rnd(4)
+     seed = rnd(4),
+     loops = false,
     })
     boss.cd = 80
     boss.shots_fired += 1
@@ -888,11 +911,11 @@ function _update60()
   end
 
   if boss.state == "laser_firing" then
-    if boss.cd <= 0 and
-       abs(boss.x - boss.corner.x) >= 1 and
-       boss.x + 6 <= x and x <= boss.x + 10 or
-       abs(boss.y - boss.corner.y) >= 1 and
-       boss.y + 6 <= y and y <= boss.y + 10 then
+   if boss.cd <= 0 and
+      abs(boss.x - boss.corner.x) >= 1 and
+      boss.x + 6 <= x and x <= boss.x + 10 or
+      abs(boss.y - boss.corner.y) >= 1 and
+      boss.y + 6 <= y and y <= boss.y + 10 then
     damage_player(1)
     sfx(24)
     boss.cd = 3
@@ -927,7 +950,8 @@ function _update60()
    boss.dx = 0
    boss.dy = 0
    boss.state = "flamethrower"
-   boss.cd = 700
+   --boss.cd = 700
+   boss.cd = 100
    boss.speed = 0.05
    boss.invuln = true
   end
@@ -944,13 +968,42 @@ function _update60()
    boss.speed = mid(0, boss.speed, 1.2)
 
    if boss.cd <= 0 then
-    -- explode the flames
-    boss.dx = 0
-    boss.dy = 0
+    boss.state = "flamethrower_explosion"
    else
     boss.dx = v.x * boss.speed
     boss.dy = v.y * boss.speed
    end
+  end
+
+  if boss.state == "flamethrower_explosion" and boss.cd <= 0 then
+   boss.cd = 4
+   -- explode the flames
+   local flame = {
+    x = boss.x - 8 + rnd(24),
+    y = boss.y - 8 + rnd(24),
+    dx = rnd() - 0.5,
+    dy = rnd() - 0.5,
+    life = 120,
+    dmg = 2,
+    loops = false,
+   }
+   local r = rnd()
+   if r < 0.25 then
+    -- flames on top
+    flame.y = boss.y - 8
+   elseif r < 0.5 then
+    -- flames on right
+    flame.x = boss.x + 24
+   elseif r < 0.75 then
+    -- flames on bottom
+    flame.y = boss.y + 24
+   else
+    -- flames on left
+    flame.x = boss.x - 8
+   end
+   add(boss.flames, flame)
+   boss.dx = 0
+   boss.dy = 0
   end
 
   -- collide shots with the boss
@@ -1138,7 +1191,13 @@ function _draw()
 
   -- draw the boss
   if boss then
-   if boss.state == "flamethrower" then
+   -- draw the launched flames
+   for flame in all(boss.flames) do
+    spr(23, flame.x, flame.y)
+   end
+
+   if boss.state == "flamethrower" or
+      boss.state == "flamethrower_explosion" then
     -- draw the flames around the boss
 
     -- bottom
@@ -1152,8 +1211,6 @@ function _draw()
 
     -- right
     spr(131, boss.x + 24, boss.y - 8, 1, 4, false, true)
-
-    clip()
    end
 
    if boss.hit then
