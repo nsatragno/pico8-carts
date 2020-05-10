@@ -52,15 +52,15 @@ function update(elements)
  for element in all(elements) do
   element.x += element.dx
   element.y += element.dy
-  if element.x > map_width then
-   element.x = 0
-  elseif element.x < 0 then
-   element.x = map_width - 1
+  if element.x > map_width + 4 then
+   element.x = -3
+  elseif element.x < -4 then
+   element.x = map_width - 3
   end
   if element.y > map_height then
-   element.y = 0
-  elseif element.y < 0 then
-   element.y = map_height - 1
+   element.y = -3
+  elseif element.y < -4 then
+   element.y = map_height - 3
   end
 
 
@@ -855,12 +855,12 @@ function _update60()
   end
 
   if boss.state == "laser_positioning" then
-   if abs(boss.x - boss.corner.x) <= 1 and
-      abs(boss.y - boss.corner.y) <= 1 then
+   if abs(boss.x - boss.corner.x) <= 0.4 and
+      abs(boss.y - boss.corner.y) <= 0.4 then
     -- pick a different corner to go to
     while true do
      local corner = get_random_corner()
-     if corner.x != boss.corner.x and
+     if corner.x != boss.corner.x or
         corner.y != boss.corner.y then
       boss.corner = corner
       break
@@ -1063,7 +1063,17 @@ function _draw()
    end
 
    if boss.state == "laser_charging" then
-    -- animate the laser cannon sticking out
+     -- animate the laser cannons
+     if abs(boss.x - boss.corner.x) >= 10 then
+       -- boss is moving horizontally, fire below and above
+       spr(137, boss.x + 8, boss.y - 8 + boss.cd / 10)
+       spr(139, boss.x + 8, boss.y + 24 - boss.cd / 10)
+     end
+     if abs(boss.y - boss.corner.y) >= 10 then
+       -- boss is moving vertically, fire sideways
+       spr(136, boss.x + 24 - boss.cd / 10, boss.y + 8)
+       spr(138, boss.x - 8 + boss.cd / 10, boss.y + 8)
+     end
    end
 
    if boss.state != "dead" then
