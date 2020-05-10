@@ -42,7 +42,7 @@ function update(elements)
   end
   if element.y > map_height then
    element.y = 0
-  elseif element.x < 0 then
+  elseif element.y < 0 then
    element.y = map_height - 1
   end
 
@@ -72,8 +72,8 @@ end
 function update_kill(enemies, explodes)
  for enemy in all(enemies) do
   if colliding(
-       enemy,
-       { x = x, y = y}) and enemy.state != "dead" then
+       { x = enemy.x, y = enemy.y },
+       { x = x + 4, y = y + 4}) and enemy.state != "dead" then
    --hp -= enemy.dmg
    kill_enemy(enemy, explodes)
    if hp <= 0 then
@@ -100,9 +100,9 @@ function collide_enemies(enemies, explodes)
 end
 
 -- returns whether |e1| and |e2| are colliding
-function colliding(e1, e2)
- return abs(e1.x - e2.x) <= 4
-    and abs(e1.y - e2.y) <= 4
+function colliding(entity, shot)
+ return entity.x <= shot.x and shot.x <= entity.x + 8 and
+        entity.y <= shot.y and shot.y <= entity.y + 8
 end
 
 -- returns the explosion sprite for |life|
@@ -278,7 +278,7 @@ function start()
 
  octopi = {}
  --for i = 1, 10 + level * 2 do
- for i = 1, 0 do
+ for i = 1, 3 do
   local c = spawn_coordinates(octopi)
   octopi[i] = { x = c.x,
                 y = c.y,
@@ -357,11 +357,15 @@ function start()
 
  boss = {
   x = map_width / 2,
-  y = 20,
-  dx = 0.125,
-  dy = 0,
+  y = 0,
+  dx = 0,
+  dy = 0.1,
   state = "intro",
   dmg = 99,
+  hp = 30,
+  hit = false,
+  invuln = true,
+  cd = 0,
  }
 
 
@@ -466,8 +470,8 @@ function _update60()
    local l =
     sqrt(dx * dx + dy * dy)
    add(shots, {
-    x = x,
-    y = y,
+    x = x + 4,
+    y = y + 4,
     dx = dx / l * 3,
     dy = dy / l * 3,
     life = 64
@@ -502,7 +506,7 @@ function _update60()
   for astro in all(astros) do
    if colliding(
         astro,
-        { x = x, y = y }) and
+        { x = x + 4, y = y + 4 }) and
       astro.state != "dead" then
     del(astros, astro)
     score += 100
@@ -522,7 +526,7 @@ function _update60()
   for healthpack in all(healthpacks) do
    if colliding(
         healthpack,
-        { x = x, y = y }) and
+        { x = x + 4, y = y + 4 }) and
       healthpack.state != "dead" then
     del(healthpacks, healthpack)
     hp = 8
@@ -573,7 +577,7 @@ function _update60()
    elseif chomper.state == "chasing" then
     local a = clamp(rnd(1))
     chomper.dx = sin(a) * 0.25
-    chomper.dy = sin(a) * 0.25
+    chomper.dy = cos(a) * 0.25
     chomper.state = "idle"
    end
   end
@@ -731,6 +735,24 @@ function _update60()
   if colliding(shell, shot) and shell.state == "closed" then
    del(shots, shot)
    end
+  end
+ end
+
+ -- update the boss
+ if boss then
+  if boss.cd > 0 then boss.cd -= 1 end
+
+  if boss.state == "intro" then
+   if boss.y >= map_height / 4 then
+    boss.state = "astrofire"
+    boss.dx = 0
+    boss.dy = 0
+    boss.cd = 30
+   end
+  end
+
+  -- collide shots with the boss
+  if not boss.invuln then
   end
  end
 
@@ -897,18 +919,16 @@ function _draw()
   -- draw the boss
   if boss then
    spr(128, boss.x, boss.y, 3, 3)
-   if boss.dx * boss.dx + boss.dy * boss.dy > 0 then
-    -- animate the engines
-    if flr(time() * 10) % 2 == 0 then
-     clrspr(boss.x, boss.y)
-     spr(186, boss.x, boss.y)
-     clrspr(boss.x, boss.y + 16)
-     spr(185, boss.x, boss.y + 16)
-     clrspr(boss.x + 16, boss.y)
-     spr(183, boss.x + 16, boss.y)
-     clrspr(boss.x + 16, boss.y + 16)
-     spr(184, boss.x + 16, boss.y + 16)
-    end
+   -- animate the engines
+   if flr(time() * 10) % 2 == 0 then
+    clrspr(boss.x, boss.y)
+    spr(186, boss.x, boss.y)
+    clrspr(boss.x, boss.y + 16)
+    spr(185, boss.x, boss.y + 16)
+    clrspr(boss.x + 16, boss.y)
+    spr(183, boss.x + 16, boss.y)
+    clrspr(boss.x + 16, boss.y + 16)
+    spr(184, boss.x + 16, boss.y + 16)
    end
   end
 
@@ -921,7 +941,7 @@ function _draw()
 
   -- draw the shots
   for shot in all(shots) do
-   pset(shot.x + 4, shot.y + 4, 12)
+   pset(shot.x, shot.y, 12)
   end
 
   -- draw the astronauts
