@@ -357,7 +357,7 @@ function start()
 
  boss = {
   x = map_width / 2,
-  y = 0,
+  y = 20,
   dx = 0,
   dy = 0.1,
   state = "intro",
@@ -367,7 +367,9 @@ function start()
   hit = false,
   invuln = true,
   cd = 0,
+  astros_fired = 0,
   explosions = {},
+  astros = {},
  }
 
 
@@ -476,7 +478,7 @@ function _update60()
     y = y + 4,
     dx = dx / l * 3,
     dy = dy / l * 3,
-    life = 64
+    life = 15
    })
    sfx(0)
   elseif not btn(🅾️) then
@@ -742,7 +744,33 @@ function _update60()
 
  -- update the boss
  if boss then
+  -- update all the boss' elements
   update(boss.explosions)
+
+  update(boss.astros)
+  update_kill(boss.astros, true)
+  collide_enemies(boss.astros, true)
+
+  for astro in all(boss.astros) do
+   if astro.state != "dead" then
+    if astro.life <= 1 then
+     astro.state = "dead"
+
+     for i = 1, 8 do
+      add(bullets, {
+       x = astro.x,
+       y = astro.y,
+       dx = sin(i / 8),
+       dy = cos(i / 8),
+       life = 60,
+       dmg = 2
+      })
+     end
+    end
+   end
+  end
+
+  -- handle the boss death animation
   if boss.state == "dying" then
    if boss.cd > 0 then
     sfx(2)
@@ -761,13 +789,38 @@ function _update60()
   if boss.cd > 0 then boss.cd -= 1 end
   if boss.hit then boss.hit = false end
 
+  -- bring the boss into the screen
   if boss.state == "intro" then
    if boss.y >= map_height / 4 then
     boss.state = "astrofire"
     boss.dx = 0
     boss.dy = 0
-    boss.cd = 30
+    boss.cd = 80
     boss.invuln = false
+   end
+  end
+
+  -- fire astronauts
+  if boss.state == "astrofire" then
+   if boss.cd <= 0 then
+    local v = vector_to_player(boss)
+    local angle_diff = boss.astros_fired / 2 + 0.25
+    local dv = normalize(v.x + sin(angle_diff) * 0.75,
+                         v.y + cos(angle_diff) * 0.75)
+    add(boss.astros, {
+     x = boss.x + 8,
+     y = boss.y + 8,
+     dx = dv.x * 0.5,
+     dy = dv.y * 0.5,
+     life = 90,
+     dmg = 3,
+     seed = rnd(4)
+    })
+    boss.cd = 80
+    boss.astros_fired += 1
+    if boss.astros_fired >= 4 then
+     boss.state = "idle"
+    end
    end
   end
 
@@ -964,6 +1017,7 @@ function _draw()
    end
 
    if boss.state == "dying" or boss.state == "dead" then
+    -- animate the explosions
     for explosion in all(boss.explosions) do
      spr(explosion_for(explosion.life), explosion.x, explosion.y)
     end
@@ -981,7 +1035,27 @@ function _draw()
     end
    end
 
+   if boss.state == "astrofire" then
+    -- animate the mouth opening for the astronauts
+    if boss.cd < 60 then
+      spr(180 + (60 - boss.cd) / 20, boss.x + 8, boss.y + 8)
+    end
+   end
+
    pal()
+
+   -- draw the boss' launched astronauts
+   for astro in all(boss.astros) do
+    if astro.state == "dead" then
+     sp = explosion_for(astro.life)
+    else
+     sp = 132 + (astro.seed + time() * 3) % 4
+     if flr(time() * 4) % 2 == 0 then
+      sp += 16
+     end
+    end
+    spr(sp, astro.x, astro.y)
+   end
   end
 
   -- draw the ship
