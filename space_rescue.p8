@@ -277,8 +277,8 @@ function start()
  end
 
  astros = {}
- for i = 1, 2 + level * 3 do
- --for i = 1, 0 do
+ --for i = 1, 2 + level * 3 do
+ for i = 1, 0 do
   local c = spawn_coordinates(astros)
   astros[i] = { x = c.x,
                 y = c.y,
@@ -389,7 +389,7 @@ function start()
   hit = false,
   invuln = true,
   cd = 0,
-  astros_fired = 0,
+  shots_fired = 0,
   explosions = {},
   astros = {},
  }
@@ -827,7 +827,7 @@ function _update60()
   if boss.state == "astrofire" then
    if boss.cd <= 0 then
     local v = vector_to_player(boss)
-    local angle_diff = boss.astros_fired / 2 + 0.25
+    local angle_diff = boss.shots_fired / 2 + 0.25
     local dv = normalize(v.x + sin(angle_diff) * 0.75,
                          v.y + cos(angle_diff) * 0.75)
     add(boss.astros, {
@@ -840,9 +840,10 @@ function _update60()
      seed = rnd(4)
     })
     boss.cd = 80
-    boss.astros_fired += 1
-    if boss.astros_fired >= 4 then
+    boss.shots_fired += 1
+    if boss.shots_fired >= 4 then
      boss.state = "laser_position"
+     boss.shots_fired = 0
      boss.cd = 0
     end
    end
@@ -859,8 +860,8 @@ function _update60()
   end
 
   if boss.state == "laser_positioning" then
-   if abs(boss.x - boss.corner.x) <= 0.4 and
-      abs(boss.y - boss.corner.y) <= 0.4 then
+   if abs(boss.x - boss.corner.x) <= 1 and
+      abs(boss.y - boss.corner.y) <= 1 then
     -- pick a different corner to go to
     while true do
      local corner = get_random_corner()
@@ -887,25 +888,41 @@ function _update60()
   end
 
   if boss.state == "laser_firing" then
-   if boss.cd <= 0 then
-    -- damage the player with the laser
-    if abs(boss.x - boss.corner.x) >= 1 and
+    if boss.cd <= 0 and
+       abs(boss.x - boss.corner.x) >= 1 and
        boss.x + 6 <= x and x <= boss.x + 10 or
        abs(boss.y - boss.corner.y) >= 1 and
        boss.y + 6 <= y and y <= boss.y + 10 then
-      damage_player(1)
-      sfx(24)
-      boss.cd = 3
-    end
+    damage_player(1)
+    sfx(24)
+    boss.cd = 3
    end
 
    -- restart once we get to the corner
-   if abs(boss.x - boss.corner.x) <= 0.4 and
-      abs(boss.y - boss.corner.y) <= 0.4 then
-    boss.state = "laser_positioning"
-    boss.dx = 0
-    boss.dy = 0
+   if abs(boss.x - boss.corner.x) <= 1 and
+      abs(boss.y - boss.corner.y) <= 1 then
+    boss.shots_fired += 1
+
+    if boss.shots_fired >= 1 then
+     boss.state = "flamethrower_positioning"
+     local v =
+      normalize((map_width / 2 - 12) - boss.x, (map_height / 2 - 12) - boss.y)
+     boss.dx = v.x * 0.8
+     boss.dy = v.y * 0.8
+    else
+     boss.state = "laser_positioning"
+     boss.dx = 0
+     boss.dy = 0
+    end
    end
+  end
+
+  if boss.state == "flamethrower_positioning" and
+     abs(boss.x - (map_width / 2 - 12)) <= 1 and
+     abs(boss.y - (map_height / 2 - 12)) <= 1 then
+   boss.dx = 0
+   boss.dy = 0
+   boss.state = "flamethrower"
   end
 
   -- collide shots with the boss
