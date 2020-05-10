@@ -31,6 +31,23 @@ function vector_to_player(element)
  return normalize(x - element.x, y - element.y)
 end
 
+function get_random_corner()
+ local corner = flr(rnd(4))
+ if corner == 0 then
+  -- top left
+  return { x = 0, y = 0 }
+ elseif corner == 1 then
+  -- top right
+  return { x = map_width - 24, y = 0 }
+ elseif corner == 2 then
+  -- bottom right
+  return { x = map_width - 24, y = map_height - 24 }
+ else
+  -- bottom left
+  return { x = 0, y = map_height - 24 }
+ end
+end
+
 function update(elements)
  for element in all(elements) do
   element.x += element.dx
@@ -792,7 +809,9 @@ function _update60()
   -- bring the boss into the screen
   if boss.state == "intro" then
    if boss.y >= map_height / 4 then
-    boss.state = "astrofire"
+    -- TODO: revert this change
+    --boss.state = "astrofire"
+    boss.state = "laser_position"
     boss.dx = 0
     boss.dy = 0
     boss.cd = 80
@@ -819,8 +838,39 @@ function _update60()
     boss.cd = 80
     boss.astros_fired += 1
     if boss.astros_fired >= 4 then
-     boss.state = "idle"
+     boss.state = "laser_position"
+     boss.cd = 0
     end
+   end
+  end
+
+  if boss.state == "laser_position" then
+   -- pick a random corner to go to
+   boss.corner = get_random_corner()
+   local v =
+    normalize(boss.corner.x - boss.x, boss.corner.y - boss.y)
+   boss.dx = v.x * 0.8
+   boss.dy = v.y * 0.8
+   boss.state = "laser_positioning"
+  end
+
+  if boss.state == "laser_positioning" then
+   if abs(boss.x - boss.corner.x) <= 1 and
+      abs(boss.y - boss.corner.y) <= 1 then
+    -- pick a different corner to go to
+    while true do
+     local corner = get_random_corner()
+     if corner.x != boss.corner.x and
+        corner.y != boss.corner.y then
+      boss.corner = corner
+      break
+     end
+    end
+
+    boss.state = "laser_charging"
+    boss.cd = 30
+    boss.dx = 0
+    boss.dy = 0
    end
   end
 
@@ -1010,6 +1060,10 @@ function _draw()
    if boss.hit then
     -- palette shift when hit
     pal({1,1,5,5,5,6,7,13,6,7,7,6,13,6,7}, 0)
+   end
+
+   if boss.state == "laser_charging" then
+    -- animate the laser cannon sticking out
    end
 
    if boss.state != "dead" then
