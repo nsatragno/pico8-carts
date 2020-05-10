@@ -355,6 +355,15 @@ function start()
                      dy = 0 }
  end
 
+ boss = {
+  x = map_width / 2,
+  y = 20,
+  dx = 0.125,
+  dy = 0,
+  state = "intro",
+  dmg = 99,
+ }
+
 
  bullets = {}
 end
@@ -701,6 +710,7 @@ function _update60()
   update_kill(lookouts, true)
   update_kill(missiles, true)
   update_kill(shells, true)
+  update_kill({boss}, true)
 
   -- maybe create a new particle
   particle_for(x, y, dx, dy, 9)
@@ -731,6 +741,7 @@ function _update60()
  collide_enemies(lookouts, true)
  collide_enemies(missiles, true)
  collide_enemies(healthpacks, true)
+ collide_enemies(boss, true)
 
  local open_shells = {}
  for shell in all(shells) do
@@ -771,6 +782,8 @@ function _update60()
  update(lookouts)
  update(missiles)
  update(shells)
+ update(healthpacks)
+ if boss then update({boss}) end
 end
 
 function print_with_color_delay(string, color, delay)
@@ -793,6 +806,10 @@ end
 
 function radar_y(y)
  return y / (map_height / 56) + 33
+end
+
+function clrspr(x, y)
+ rectfill(x, y, x + 7, y + 7, 0)
 end
 
 function _draw()
@@ -875,6 +892,24 @@ function _draw()
   -- draw the particles
   for part in all(parts) do
    pset(part.x, part.y, part.color)
+  end
+
+  -- draw the boss
+  if boss then
+   spr(128, boss.x, boss.y, 3, 3)
+   if boss.dx * boss.dx + boss.dy * boss.dy > 0 then
+    -- animate the engines
+    if flr(time() * 10) % 2 == 0 then
+     clrspr(boss.x, boss.y)
+     spr(186, boss.x, boss.y)
+     clrspr(boss.x, boss.y + 16)
+     spr(185, boss.x, boss.y + 16)
+     clrspr(boss.x + 16, boss.y)
+     spr(183, boss.x + 16, boss.y)
+     clrspr(boss.x + 16, boss.y + 16)
+     spr(184, boss.x + 16, boss.y + 16)
+    end
+   end
   end
 
   -- draw the ship
