@@ -86,19 +86,24 @@ function kill_enemy(enemy, explodes)
  enemy.dy = 0
 end
 
+function damage_player(dmg)
+ hit = true
+ hp -= dmg
+ if hp <= 0 then
+  state = "dead"
+  music(-1)
+  sfx(2)
+  time_death = 54
+ end
+end
+
 function update_kill(enemies, explodes)
  for enemy in all(enemies) do
   if colliding(
        { x = enemy.x, y = enemy.y },
        { x = x + 4, y = y + 4}) and enemy.state != "dead" then
-   --hp -= enemy.dmg
+   damage_player(enemy.dmg)
    kill_enemy(enemy, explodes)
-   if hp <= 0 then
-    state = "dead"
-    music(-1)
-    sfx(2)
-    time_death = 54
-   end
   end
  end
 end
@@ -882,6 +887,19 @@ function _update60()
   end
 
   if boss.state == "laser_firing" then
+   if boss.cd <= 0 then
+    -- damage the player with the laser
+    if abs(boss.x - boss.corner.x) >= 1 and
+       boss.x + 6 <= x and x <= boss.x + 10 or
+       abs(boss.y - boss.corner.y) >= 1 and
+       boss.y + 6 <= y and y <= boss.y + 10 then
+      damage_player(1)
+      sfx(24)
+      boss.cd = 3
+    end
+   end
+
+   -- restart once we get to the corner
    if abs(boss.x - boss.corner.x) <= 0.4 and
       abs(boss.y - boss.corner.y) <= 0.4 then
     boss.state = "laser_positioning"
@@ -1159,7 +1177,12 @@ function _draw()
 
   -- draw the ship
   if state == "alive" or state == "next level" or state == "menu" then
+   if hit then
+    pal({[6] = 8, [8] = 2}, 0)
+    hit = false
+   end
    spr(a * 8 + 1, x, y)
+   pal()
   elseif state == "dead" then
    spr(explosion_for(time_death), x, y)
   end
