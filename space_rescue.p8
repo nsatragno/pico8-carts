@@ -278,7 +278,7 @@ function start()
 
  octopi = {}
  --for i = 1, 10 + level * 2 do
- for i = 1, 3 do
+ for i = 1, 0 do
   local c = spawn_coordinates(octopi)
   octopi[i] = { x = c.x,
                 y = c.y,
@@ -362,10 +362,12 @@ function start()
   dy = 0.1,
   state = "intro",
   dmg = 99,
-  hp = 30,
+  hp = 4,
+  --hp = 30,
   hit = false,
   invuln = true,
   cd = 0,
+  explosions = {},
  }
 
 
@@ -740,7 +742,24 @@ function _update60()
 
  -- update the boss
  if boss then
+  update(boss.explosions)
+  if boss.state == "dying" then
+   if boss.cd > 0 then
+    sfx(2)
+    add(boss.explosions, {
+     life = 54,
+     x = boss.x + rnd(16),
+     y = boss.y + rnd(16),
+     dx = 0,
+     dy = 0,
+    })
+   else
+    boss.state = "dead"
+   end
+  end
+
   if boss.cd > 0 then boss.cd -= 1 end
+  if boss.hit then boss.hit = false end
 
   if boss.state == "intro" then
    if boss.y >= map_height / 4 then
@@ -748,11 +767,28 @@ function _update60()
     boss.dx = 0
     boss.dy = 0
     boss.cd = 30
+    boss.invuln = false
    end
   end
 
   -- collide shots with the boss
-  if not boss.invuln then
+  if boss.state != "dying" then
+   for shot in all(shots) do
+    if boss.x <= shot.x and shot.x <= boss.x + 24 and
+       boss.y <= shot.y and shot.y <= boss.y + 24 then
+     del(shots, shot)
+     if not boss.invuln then
+      boss.hp -= 1
+      if boss.hp <= 0 then
+       music(-1)
+       boss.state = "dying"
+       boss.cd = 120
+      else
+       boss.hit = true
+      end
+     end
+    end
+   end
   end
  end
 
@@ -918,18 +954,34 @@ function _draw()
 
   -- draw the boss
   if boss then
-   spr(128, boss.x, boss.y, 3, 3)
-   -- animate the engines
-   if flr(time() * 10) % 2 == 0 then
-    clrspr(boss.x, boss.y)
-    spr(186, boss.x, boss.y)
-    clrspr(boss.x, boss.y + 16)
-    spr(185, boss.x, boss.y + 16)
-    clrspr(boss.x + 16, boss.y)
-    spr(183, boss.x + 16, boss.y)
-    clrspr(boss.x + 16, boss.y + 16)
-    spr(184, boss.x + 16, boss.y + 16)
+   if boss.hit then
+    -- palette shift when hit
+    pal({1,1,5,5,5,6,7,13,6,7,7,6,13,6,7}, 0)
    end
+
+   if boss.state != "dead" then
+    spr(128, boss.x, boss.y, 3, 3)
+   end
+
+   if boss.state == "dying" or boss.state == "dead" then
+    for explosion in all(boss.explosions) do
+     spr(explosion_for(explosion.life), explosion.x, explosion.y)
+    end
+   else
+    -- animate the engines
+    if flr(time() * 10) % 2 == 0 then
+     clrspr(boss.x, boss.y)
+     spr(186, boss.x, boss.y)
+     clrspr(boss.x, boss.y + 16)
+     spr(185, boss.x, boss.y + 16)
+     clrspr(boss.x + 16, boss.y)
+     spr(183, boss.x + 16, boss.y)
+     clrspr(boss.x + 16, boss.y + 16)
+     spr(184, boss.x + 16, boss.y + 16)
+    end
+   end
+
+   pal()
   end
 
   -- draw the ship
