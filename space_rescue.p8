@@ -302,7 +302,8 @@ function start()
                 y = c.y,
                 dx = 0,
                 dy = 0,
-                loops = true, }
+                loops = true,
+                form = flr(rnd(2)) }
  end
 
  debris = {}
@@ -868,6 +869,7 @@ function _update60()
       dx = rnd() * 2 - 1,
       dy = rnd() * 2 - 1,
       loops = true,
+      form = flr(rnd(2)),
      })
     end
    end
@@ -1410,7 +1412,7 @@ function _draw()
    if astro.state == "dead" then
     sp = explosion_for(astro.life)
    else
-    sp = 9
+    sp = 9 + astro.form
    end
    spr(sp, astro.x, astro.y)
   end
