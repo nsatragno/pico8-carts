@@ -826,6 +826,14 @@ function _update60()
    end
   end
 
+  -- collide the boss with the player
+  if boss.state != "dying" and boss.state != "dead" and
+     boss.x - 8 <= x and x <= boss.x + 24 and
+     boss.y - 8 <= y and y <= boss.y + 24 then
+   -- colliding with the boss instantly kills the player :)
+   damage_player(9999)
+  end
+
   -- handle the boss death animation
   if boss.state == "dying" then
    if boss.cd > 0 then
@@ -851,7 +859,7 @@ function _update60()
    if boss.y >= map_height / 4 then
     -- TODO: revert this change
     --boss.state = "astrofire"
-    boss.state = "laser_position"
+    boss.state = "flamethrower_position"
     boss.dx = 0
     boss.dy = 0
     boss.shots_fired = 0
@@ -966,12 +974,19 @@ function _update60()
    boss.dx = 0
    boss.dy = 0
    boss.state = "flamethrower"
-   --boss.cd = 700
-   boss.cd = 100
+   boss.loops = true
+   boss.cd = 600
+   --boss.cd = 100
    boss.speed = 0.05
   end
 
   if boss.state == "flamethrower" then
+  -- collide the fire around the boss with the player
+   if boss.x - 16 <= x and x <= boss.x + 32 and
+      boss.y - 16 <= y and y <= boss.y + 32 then
+    damage_player(1)
+   end
+
    -- chase the player
    local v = vector_to_player(boss)
    if boss.cd <= 100 then
@@ -984,6 +999,7 @@ function _update60()
 
    if boss.cd <= 0 then
     boss.state = "flamethrower_explosion"
+    boss.loops = false
    else
     boss.dx = v.x * boss.speed
     boss.dy = v.y * boss.speed
