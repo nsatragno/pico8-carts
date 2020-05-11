@@ -129,8 +129,10 @@ function collide_enemies(enemies, explodes)
   for enemy in all(enemies) do
    if colliding(enemy, shot) and
       enemy.state != "dead" then
-    kill_enemy(enemy, explodes)
-    score += 10
+    if not enemy.invuln then
+     kill_enemy(enemy, explodes)
+     score += 10
+    end
     del(shots, shot)
    end
   end
@@ -313,7 +315,8 @@ function start()
                 dy = rnd(1) - 0.5,
                 sp = flr(rnd(6)) + 16,
                 dmg = 3,
-                loops = true }
+                loops = true,
+                invuln = true }
  end
 
  octopi = {}
@@ -388,6 +391,7 @@ function start()
                 dmg = 3,
                 bullets_fired = 0,
                 state = "closed",
+                invuln = true,
                 loops = true }
  end
 
@@ -727,11 +731,13 @@ function _update60()
        shell.state == "closed" then
      shell.bullets_fired = 0
      shell.state = "open"
+     shell.invuln = false
      shell.cd = min(shell.cd, 20)
     elseif abs(shell.x - x) >= 50 and
            abs(shell.y - y) >= 50 and
            shell.state == "open" then
      shell.state = "closed"
+     shell.invuln = true
     elseif shell.state == "open" and
            shell.bullets_fired <= 24 and
            shell.cd <= 0 then
@@ -759,6 +765,7 @@ function _update60()
            shell.bullets_fired > 24 then
      shell.bullets_fired = 0
      shell.state = "closed"
+     shell.invuln = true
      shell.cd = 300
     end
    end
@@ -777,15 +784,6 @@ function _update60()
   -- maybe create a new particle
   particle_for(x, y, dx, dy, 9)
  end  -- end if state == "alive" or state == "radar"
-
- -- collide shots with debris
- for shot in all(shots) do
-  for debri in all(debris) do
-  if colliding(debri, shot) then
-   del(shots, shot)
-   end
-  end
- end
 
  -- collide shots with closed shells
  for shot in all(shots) do
@@ -1074,14 +1072,8 @@ function _update60()
  collide_enemies(missiles, true)
  collide_enemies(healthpacks, true)
  collide_enemies(boss, true)
-
- local open_shells = {}
- for shell in all(shells) do
-  if shell.state == "open" then
-   add(open_shells, shell)
-  end
- end
- collide_enemies(open_shells, true)
+ collide_enemies(debris, false)
+ collide_enemies(shells, true)
 
  -- collide shots with astronauts
  for shot in all(shots) do
