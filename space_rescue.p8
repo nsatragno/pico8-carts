@@ -254,7 +254,8 @@ function restart()
  current_message_color = nil
  message_timer = 0
  score = 0
- level = 1
+ level = 3
+ --level = 1
  state = "menu"
  start()
 end
@@ -496,6 +497,7 @@ function _update60()
  if state == "game over" then
   if btnp(🅾️) then
    start()
+   music(0)
    score = 0
    state = "alive"
   end
@@ -506,6 +508,13 @@ function _update60()
  if state == "intro" then
   if btnp(🅾️) then
    state = "menu"
+  end
+  return
+ end
+
+ if state == "win" then
+  if btnp(🅾️) then
+   reload()
   end
   return
  end
@@ -590,7 +599,11 @@ function _update60()
     message_timer = 180
     if #astros <= 0 then
      music(-1)
-     state = "next level"
+     if level >= 3 then
+      state = "win"
+     else
+      state = "next level"
+     end
      return
     end
    end
@@ -1107,7 +1120,7 @@ function _update60()
   end
 
   -- collide shots with the boss
-  if boss.state != "dying" then
+  if boss.state != "dying" and boss.state != "dead" then
    for shot in all(shots) do
     if boss.x <= shot.x and shot.x <= boss.x + 24 and
        boss.y <= shot.y and shot.y <= boss.y + 24 then
@@ -1540,11 +1553,16 @@ function _draw()
   print(center("game  over"), 0, 48, 8)
   print(center("score: "..pad(score, 5)), 0, 56, 11)
   print(center(game_over_message), 0, 64, 11)
-  print(center("press 🅾️ to try again"), 0, 72, 7)
+  print(center("press 🅾️ to restart level"), 0, 72, 7)
  elseif state == "next level" then
   print(center("level complete"), 0, 48, 8)
   print(center("score: "..pad(score, 5)), 0, 56, 11)
   print(center("press 🅾️ to continue"), 0, 72, 7)
+ elseif state == "win" then
+  print(center("you rescued all the pilots"), 0, 48, 8)
+  print(center("humanity can fight again"), 0, 56, 12)
+  print(center("thanks to you"), 0, 64, 12)
+  print(center("final score: "..pad(score, 5)), 0, 72, 7)
  else
   rectfill(0, 0, 127, 8, 0)
   if current_message then
