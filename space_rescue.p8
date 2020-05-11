@@ -513,9 +513,6 @@ function _update60()
  end
 
  if state == "win" then
-  if btnp(🅾️) then
-   reload()
-  end
   return
  end
 
