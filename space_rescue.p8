@@ -412,8 +412,7 @@ function start()
   dy = 0.1,
   state = "intro",
   dmg = 99,
-  hp = 4,
-  --hp = 30,
+  hp = 30,
   hit = false,
   invuln = true,
   cd = 0,
@@ -988,7 +987,7 @@ function _update60()
       boss.x + 6 <= x and x <= boss.x + 10 or
       abs(boss.y - boss.corner.y) >= 1 and
       boss.y + 6 <= y and y <= boss.y + 10 then
-    damage_player(1)
+    damage_player(2)
     sfx(24)
     boss.cd = 3
    end
@@ -998,8 +997,7 @@ function _update60()
       abs(boss.y - boss.corner.y) <= 1 then
     boss.shots_fired += 1
 
-    --if boss.shots_fired >= 4 then
-    if boss.shots_fired >= 40 then
+    if boss.shots_fired >= 4 then
      boss.shots_fired = 0
      boss.state = get_boss_phase()
     else
@@ -1086,9 +1084,9 @@ function _update60()
    boss.dx = 0
    boss.dy = 0
 
-   if boss.shots_fired >= 4 then
+   if boss.shots_fired >= 100 then
     boss.shots_fired = 0
-    boss.state = "astrofire"
+    boss.state = get_boss_phase()
    end
   end
 
