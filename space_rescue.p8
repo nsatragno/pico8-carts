@@ -1242,6 +1242,7 @@ function _draw()
 
    if time() > 24 then
     state = "menu"
+    print_menu(7)
    elseif time() > 23.5 then
     print_menu(6)
    elseif time() > 23 then
