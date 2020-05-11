@@ -494,7 +494,9 @@ function _update60()
 
  if state == "game over" then
   if btnp(🅾️) then
-   restart()
+   start()
+   score = 0
+   state = "alive"
   end
   return
  end
