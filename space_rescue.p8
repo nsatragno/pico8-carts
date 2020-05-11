@@ -846,6 +846,24 @@ function _update60()
     })
    else
     boss.state = "dead"
+    score += 10000
+    for i = 0, 10 do
+     add(astros, {
+      x = boss.x + 8,
+      y = boss.y + 8,
+      dx = rnd() * 2 - 1,
+      dy = rnd() * 2 - 1,
+      loops = true,
+     })
+    end
+   end
+  end
+
+  -- drift the astronauts
+  if boss.state == "dead" then
+   for astro in all(astros) do
+    astro.dx *= 0.98
+    astro.dy *= 0.98
    end
   end
 
@@ -1325,7 +1343,8 @@ function _draw()
   end
 
   -- draw the ship
-  if state == "alive" or state == "next level" or state == "menu" then
+  if state == "alive" or state == "next level" or state == "menu" or
+     state == "win" then
    if hit then
     pal({[6] = 8, [8] = 2}, 0)
     hit = false
