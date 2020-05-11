@@ -407,7 +407,7 @@ function start()
 
  boss = {
   x = map_width / 2,
-  y = 20,
+  y = -24,
   dx = 0,
   dy = 0.1,
   state = "intro",
@@ -426,6 +426,17 @@ function start()
 
 
  bullets = {}
+end
+
+function get_boss_phase()
+ local r = flr(rnd(3))
+ if r == 0 then
+  return "astrofire_position"
+ elseif r == 1 then
+  return "laser_position"
+ else
+  return "flamethrower_position"
+ end
 end
 
 function particle_for(x, y, dx, dy, color)
@@ -873,7 +884,7 @@ function _update60()
   -- bring the boss into the screen
   if boss.state == "intro" then
    if boss.y >= map_height / 4 then
-    boss.state = "astrofire_position"
+    boss.state = get_boss_phase()
     boss.dx = 0
     boss.dy = 0
     boss.shots_fired = 0
@@ -924,7 +935,7 @@ function _update60()
     boss.cd = 80
     boss.shots_fired += 1
     if boss.shots_fired >= 4 then
-     boss.state = "laser_position"
+     boss.state = get_boss_phase()
      boss.shots_fired = 0
      boss.cd = 0
     end
@@ -988,7 +999,7 @@ function _update60()
     --if boss.shots_fired >= 4 then
     if boss.shots_fired >= 40 then
      boss.shots_fired = 0
-     boss.state = "flamethrower_position"
+     boss.state = get_boss_phase()
     else
      boss.state = "laser_positioning"
      boss.dx = 0
