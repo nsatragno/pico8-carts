@@ -873,14 +873,35 @@ function _update60()
   -- bring the boss into the screen
   if boss.state == "intro" then
    if boss.y >= map_height / 4 then
-    -- TODO: revert this change
-    --boss.state = "astrofire"
-    boss.state = "flamethrower_position"
+    boss.state = "astrofire_position"
     boss.dx = 0
     boss.dy = 0
     boss.shots_fired = 0
     boss.invuln = false
    end
+  end
+
+  -- position to fire astronauts
+  if boss.state == "astrofire_position" then
+   -- pick a random point near the middle
+   boss.corner = {
+    x = (map_width / 2 - 12) + rnd(30) - 15,
+    y = (map_height / 2 - 12) + rnd(30) - 15,
+   }
+   local v =
+    normalize(boss.corner.x - boss.x, boss.corner.y - boss.y)
+   boss.dx = v.x * 0.8
+   boss.dy = v.y * 0.8
+   boss.state = "astrofire_positioning"
+  end
+
+  if boss.state == "astrofire_positioning" and
+     abs(boss.x - boss.corner.x) <= 1 and
+     abs(boss.y - boss.corner.y) <= 1 then
+   boss.dx = 0
+   boss.dy = 0
+   boss.state = "astrofire"
+   boss.cd = 80
   end
 
   -- fire astronauts
@@ -992,7 +1013,6 @@ function _update60()
    boss.state = "flamethrower"
    boss.loops = true
    boss.cd = 600
-   --boss.cd = 100
    boss.speed = 0.05
   end
 
@@ -1053,7 +1073,7 @@ function _update60()
    boss.dx = 0
    boss.dy = 0
 
-   if boss.shots_fired >= 100 then
+   if boss.shots_fired >= 4 then
     boss.shots_fired = 0
     boss.state = "astrofire"
    end
@@ -1219,9 +1239,9 @@ function _draw()
           + (camera_x * 0.95)
  camera_y = (y - 56 + camera_dy) * 0.05
           + (camera_y * 0.95)
- camera_x = flr(mid(0, camera_x, map_width - 128))
+ camera_x = flr(mid(-4, camera_x, map_width - 124))
  -- allow the camera to go up 8 pixels to make room for the HUD.
- camera_y = flr(mid(-8, camera_y, map_height - 128))
+ camera_y = flr(mid(-12, camera_y, map_height - 124))
 
  camera(camera_x, camera_y)
 
