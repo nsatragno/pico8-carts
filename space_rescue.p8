@@ -396,7 +396,8 @@ function start()
  end
 
  healthpacks = {}
- for i = 1, rnd(3) + 1 do
+ --for i = 1, rnd(3) + 1 do
+ for i = 1, 0 do
   local c = spawn_coordinates(lookouts)
   healthpacks[i] = { x = c.x,
                      y = c.y,
@@ -520,14 +521,15 @@ function _update60()
 
  -- flight controls
  elseif state == "alive" then
+  local steering = 0.018 * (1.7 - s)
   if btnp(❎) then
    state = "radar"
   end
   if btn(⬅️) then
-    a -= .02
+    a -= steering
   end
   if btn(➡️) then
-   a += .02
+   a += steering
   end
   if btn(⬆️) then
    s += .03
@@ -544,7 +546,7 @@ function _update60()
     y = y + 4,
     dx = dx / l * 3,
     dy = dy / l * 3,
-    life = 20,
+    life = 30,
     loops = false,
    })
    sfx(0)
@@ -562,15 +564,15 @@ function _update60()
   dy = cos(clamp(a) - .25) * s
   x += dx
   y += dy
-  if x >= map_width + 40 then
-   x = -60
-  elseif x < -60 then
-   x = map_width + 40
+  if x >= map_width + 10 then
+   x = -20
+  elseif x < -20 then
+   x = map_width + 10
   end
-  if y >= map_height + 40 then
-   y = -60
-  elseif y < -60 then
-   y = map_height + 40
+  if y >= map_height + 10 then
+   y = -20
+  elseif y < -20 then
+   y = map_height + 10
   end
 
   -- rescue astronauts
@@ -923,16 +925,27 @@ function _update60()
     local angle_diff = boss.shots_fired / 2 + 0.25
     local dv = normalize(v.x + sin(angle_diff) * 0.75,
                          v.y + cos(angle_diff) * 0.75)
-    add(boss.astros, {
-     x = boss.x + 8,
-     y = boss.y + 8,
-     dx = dv.x * 0.5,
-     dy = dv.y * 0.5,
-     life = 90 + rnd(20),
-     dmg = 3,
-     seed = rnd(4),
-     loops = false,
-    })
+    if rnd() < 0.05 then
+     add(healthpacks, {
+      x = boss.x + 8,
+      y = boss.y + 8,
+      dx = dv.x * 0.5,
+      dy = dv.y * 0.5,
+      life = 130 + rnd(20),
+      loops = true,
+     })
+    else
+     add(boss.astros, {
+      x = boss.x + 8,
+      y = boss.y + 8,
+      dx = dv.x * 0.5,
+      dy = dv.y * 0.5,
+      life = 90 + rnd(20),
+      dmg = 3,
+      seed = rnd(4),
+      loops = false,
+     })
+    end
     boss.cd = 80
     boss.shots_fired += 1
     if boss.shots_fired >= 4 then
@@ -982,14 +995,15 @@ function _update60()
   end
 
   if boss.state == "laser_firing" then
-   if boss.cd <= 0 and
-      abs(boss.x - boss.corner.x) >= 1 and
+   if boss.cd <= 0 then
+    if abs(boss.x - boss.corner.x) >= 1 and
       boss.x + 6 <= x and x <= boss.x + 10 or
       abs(boss.y - boss.corner.y) >= 1 and
       boss.y + 6 <= y and y <= boss.y + 10 then
     damage_player(2)
     sfx(24)
-    boss.cd = 3
+    boss.cd = 30
+    end
    end
 
    -- restart once we get to the corner
