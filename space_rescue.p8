@@ -22,8 +22,21 @@ function clamp(a)
  return flr(a * 8) / 8
 end
 
+k_max_safe_number = sqrt(0x7fff)
 function normalize(x, y)
- local l = sqrt(x * 0x0.0001 * x + y * 0x0.0001 * y ) * 0x100 + 0.0001
+ local l
+ -- prevent overflow
+ if x >= k_max_safe_number or
+    x <= -k_max_safe_number or
+    y >= k_max_safe_number or
+    y <= -k_max_safe_number then
+  local nx = x * 0x0.01
+  local ny = y * 0x0.01
+  l = sqrt(nx * nx + ny * ny) * 0x100
+ else
+  l = sqrt(x * x + y * y)
+ end
+
  return { x = x / l, y = y / l }
 end
 
@@ -804,7 +817,7 @@ function _update60()
        y = astro.y,
        dx = sin(i / 8),
        dy = cos(i / 8),
-       life = 60,
+       life = 300,
        dmg = 2,
        loops = false,
       })
@@ -838,9 +851,10 @@ function _update60()
    if boss.y >= map_height / 4 then
     -- TODO: revert this change
     --boss.state = "astrofire"
-    boss.state = "flamethrower_position"
+    boss.state = "laser_position"
     boss.dx = 0
     boss.dy = 0
+    boss.shots_fired = 0
     boss.invuln = false
    end
   end
@@ -857,7 +871,7 @@ function _update60()
      y = boss.y + 8,
      dx = dv.x * 0.5,
      dy = dv.y * 0.5,
-     life = 90,
+     life = 90 + rnd(20),
      dmg = 3,
      seed = rnd(4),
      loops = false,
@@ -888,8 +902,8 @@ function _update60()
     -- pick a different corner to go to
     while true do
      local corner = get_random_corner()
-     if corner.x != boss.corner.x or
-        corner.y != boss.corner.y then
+     if abs(corner.x - boss.corner.x) <= 2 or
+        abs(corner.y - boss.corner.y) <= 2 then
       boss.corner = corner
       break
      end
@@ -926,7 +940,9 @@ function _update60()
       abs(boss.y - boss.corner.y) <= 1 then
     boss.shots_fired += 1
 
-    if boss.shots_fired >= 4 then
+    --if boss.shots_fired >= 4 then
+    if boss.shots_fired >= 40 then
+     boss.shots_fired = 0
      boss.state = "flamethrower_position"
     else
      boss.state = "laser_positioning"
@@ -953,7 +969,6 @@ function _update60()
    --boss.cd = 700
    boss.cd = 100
    boss.speed = 0.05
-   boss.invuln = true
   end
 
   if boss.state == "flamethrower" then
@@ -977,13 +992,14 @@ function _update60()
 
   if boss.state == "flamethrower_explosion" and boss.cd <= 0 then
    boss.cd = 4
+   boss.shots_fired += 1
    -- explode the flames
    local flame = {
     x = boss.x - 8 + rnd(24),
     y = boss.y - 8 + rnd(24),
     dx = rnd() - 0.5,
     dy = rnd() - 0.5,
-    life = 120,
+    life = 500,
     dmg = 2,
     loops = false,
    }
@@ -1004,6 +1020,11 @@ function _update60()
    add(boss.flames, flame)
    boss.dx = 0
    boss.dy = 0
+
+   if boss.shots_fired >= 100 then
+    boss.shots_fired = 0
+    boss.state = "astrofire"
+   end
   end
 
   -- collide shots with the boss
