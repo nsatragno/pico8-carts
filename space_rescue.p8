@@ -263,7 +263,8 @@ end
 function start()
  map_width = 256
  map_height = 128
- hp = 8
+ max_hp = 8
+ hp = max_hp
  x = map_width / 2
  dx = 0
  y = map_height / 2
@@ -613,7 +614,7 @@ function _update60()
         { x = x + 4, y = y + 4 }) and
       healthpack.state != "dead" then
     del(healthpacks, healthpack)
-    hp = 8
+    hp = max_hp
     sfx(3)
    end
   end
@@ -916,8 +917,8 @@ function _update60()
    }
    local v =
     normalize(boss.corner.x - boss.x, boss.corner.y - boss.y)
-   boss.dx = v.x * 0.8
-   boss.dy = v.y * 0.8
+   boss.dx = v.x * 0.5
+   boss.dy = v.y * 0.5
    boss.state = "astrofire_positioning"
   end
 
@@ -937,13 +938,13 @@ function _update60()
     local angle_diff = boss.shots_fired / 2 + 0.25
     local dv = normalize(v.x + sin(angle_diff) * 0.75,
                          v.y + cos(angle_diff) * 0.75)
-    if rnd() < 0.05 then
+    if rnd() < 0.02 * (max_hp - hp) then
      add(healthpacks, {
       x = boss.x + 8,
       y = boss.y + 8,
       dx = dv.x * 0.5,
       dy = dv.y * 0.5,
-      life = 130 + rnd(20),
+      life = 400,
       loops = true,
      })
     else
@@ -973,8 +974,8 @@ function _update60()
    boss.corner = get_random_corner()
    local v =
     normalize(boss.corner.x - boss.x, boss.corner.y - boss.y)
-   boss.dx = v.x * 0.8
-   boss.dy = v.y * 0.8
+   boss.dx = v.x * 0.5
+   boss.dy = v.y * 0.5
    boss.state = "laser_positioning"
   end
 
@@ -1037,8 +1038,8 @@ function _update60()
   if boss.state == "flamethrower_position" then
    local v =
     normalize((map_width / 2 - 12) - boss.x, (map_height / 2 - 12) - boss.y)
-   boss.dx = v.x * 0.8
-   boss.dy = v.y * 0.8
+   boss.dx = v.x * 0.5
+   boss.dy = v.y * 0.5
    boss.state = "flamethrower_positioning"
   end
 
