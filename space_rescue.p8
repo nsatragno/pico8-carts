@@ -255,15 +255,23 @@ function restart()
  message_timer = 0
  score = 0
  level = 3
- --level = 1
  state = "menu"
+ max_hp = 8
  start()
 end
 
 function start()
- map_width = 256
- map_height = 128
- max_hp = 8
+ if level == 1 then
+  map_width = 500
+  map_height = 250
+ elseif level == 2 then
+  map_width = 1000
+  map_height = 500
+ elseif level == 3 then
+  map_width = 256
+  map_height = 128
+ end
+
  hp = max_hp
  x = map_width / 2
  dx = 0
@@ -279,21 +287,19 @@ function start()
  shots = {}
 
  stars = {}
+ local palette
+ if level == 1 then
+  palette = {5, 6, 7, 13}
+ elseif level == 2 then
+  palette = {4, 10, 9, 15}
+ else
+  palette = {2, 8, 9, 14}
+ end
  for i = 1, map_height / 100 * map_width / 10 do
   local r = flr(rnd(4))
-  local color
-  if r == 0 then
-   color = 6
-  elseif r == 1 then
-   color = 7
-  elseif r == 2 then
-   color = 10
-  else
-   color = 15
-  end
   stars[i] = { x = rnd(map_width),
                y = rnd(map_height),
-               color = color }
+               color = palette[r] }
  end
 
  astros = {}
@@ -1541,6 +1547,9 @@ function _draw()
   end
   for healthpack in all(healthpacks) do
    pset(radar_x(healthpack.x), radar_y(healthpack.y), 12)
+  end
+  if boss and boss.state != "dead" then
+   pset(radar_x(boss.x), radar_y(boss.y), 8)
   end
   if flr(time() * 3) % 2 == 0 then
    pset(radar_x(x), radar_y(y), 10)
