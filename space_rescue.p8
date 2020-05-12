@@ -254,7 +254,7 @@ function restart()
  current_message_color = nil
  message_timer = 0
  score = 0
- level = 3
+ level = 1
  state = "menu"
  max_hp = 8
  start()
@@ -268,6 +268,9 @@ function start()
   map_width = 1000
   map_height = 500
  elseif level == 3 then
+  map_width = 2000
+  map_height = 1000
+ elseif level == 4 then
   map_width = 256
   map_height = 128
  end
@@ -303,8 +306,12 @@ function start()
  end
 
  astros = {}
- --for i = 1, 2 + level * 3 do
- for i = 1, 0 do
+ local astro_num = 0
+ if level != 4 then
+  astro_num = 10 + level * 5
+ end
+
+ for i = 1, astro_num do
   local c = spawn_coordinates(astros)
   astros[i] = { x = c.x,
                 y = c.y,
@@ -315,8 +322,11 @@ function start()
  end
 
  debris = {}
- --for i = 1, 6 + level * 3 do
- for i = 1, 0 do
+ local debris_num = 0
+ if level != 4 then
+  debris_num = 10 * level
+ end
+ for i = 1, debris_num do
   local c = spawn_coordinates(debris)
   debris[i] = { x = c.x,
                 y = c.y,
@@ -329,21 +339,25 @@ function start()
  end
 
  octopi = {}
- --for i = 1, 10 + level * 2 do
- for i = 1, 0 do
-  local c = spawn_coordinates(octopi)
-  octopi[i] = { x = c.x,
-                y = c.y,
-                dx = rnd(0.3) - 0.15,
-                dy = rnd(0.3) - 0.15,
-                cd = 0,
-                dmg = 2,
-                loops = true }
+ if level != 4 then
+  for i = 1, 12 do
+   local c = spawn_coordinates(octopi)
+   octopi[i] = { x = c.x,
+                 y = c.y,
+                 dx = rnd(0.3) - 0.15,
+                 dy = rnd(0.3) - 0.15,
+                 cd = 0,
+                 dmg = 2,
+                 loops = true }
+  end
  end
 
  chompers = {}
- for i = 1, 0 do
- --for i = 1, (level - 1) * 2 do
+ local chompers_num = 0
+ if level >= 2 and level != 4 then
+  chompers_num = 12
+ end
+ for i = 1, chompers_num do
   local c = spawn_coordinates(chompers)
   local a = clamp(rnd(1))
   chompers[i] = { x = c.x,
@@ -358,8 +372,11 @@ function start()
  end
 
  eyes = {}
- for i = 1, 0 do
- --for i = 1, (level - 2) * 3 do
+ local eyes_num = 0
+ if level >= 2 and level != 4 then
+  eyes_num = level * 5
+ end
+ for i = 1, eyes_num do
   local c = spawn_coordinates(eyes)
   local a = clamp(rnd(1))
   eyes[i] = { x = c.x,
@@ -374,8 +391,11 @@ function start()
 
  lookouts = {}
  missiles = {}
- for i = 1, 0 do
- --for i = 1, (level - 2) * 2 do
+ local lookouts_num = 0
+ if level == 3 then
+  lookouts_num = 20
+ end
+ for i = 1, lookouts_num do
   local c = spawn_coordinates(lookouts)
   lookouts[i] = { x = c.x,
                   y = c.y,
@@ -389,8 +409,11 @@ function start()
  end
 
  shells = {}
- for i = 1, 0 do
- --for i = 1, (level - 3) * 2 do
+ local shells_num = 0
+ if level == 3 then
+  shells_num = 20
+ end
+ for i = 1, shells_num do
   local c = spawn_coordinates(shells)
   shells[i] = { x = c.x,
                 y = c.y,
@@ -405,34 +428,36 @@ function start()
  end
 
  healthpacks = {}
- --for i = 1, rnd(3) + 1 do
- for i = 1, 0 do
-  local c = spawn_coordinates(lookouts)
-  healthpacks[i] = { x = c.x,
-                     y = c.y,
-                     dx = 0,
-                     dy = 0,
-                     loops = true }
+ if level != 4 then
+  for i = 1, flr(rnd(3)) + 1 do
+   local c = spawn_coordinates(lookouts)
+   healthpacks[i] = { x = c.x,
+                      y = c.y,
+                      dx = 0,
+                      dy = 0,
+                      loops = true }
+  end
  end
 
- boss = {
-  x = map_width / 2,
-  y = -24,
-  dx = 0,
-  dy = 0.1,
-  state = "intro",
-  dmg = 99,
-  hp = 30,
-  hit = false,
-  invuln = true,
-  cd = 0,
-  shots_fired = 0,
-  explosions = {},
-  astros = {},
-  flames = {},
-  loops = false,
- }
-
+ if level == 4 then
+  boss = {
+   x = map_width / 2,
+   y = -24,
+   dx = 0,
+   dy = 0.1,
+   state = "intro",
+   dmg = 99,
+   hp = 30,
+   hit = false,
+   invuln = true,
+   cd = 0,
+   shots_fired = 0,
+   explosions = {},
+   astros = {},
+   flames = {},
+   loops = false,
+  }
+ end
 
  bullets = {}
 end
@@ -607,6 +632,8 @@ function _update60()
       state = "win"
      else
       state = "next level"
+      message_timer = 0
+      current_message = nil
      end
      return
     end
@@ -620,6 +647,9 @@ function _update60()
         { x = x + 4, y = y + 4 }) and
       healthpack.state != "dead" then
     del(healthpacks, healthpack)
+    current_message = "shield energy refilled"
+    current_message_color = 12
+    message_timer = 180
     hp = max_hp
     sfx(3)
    end
