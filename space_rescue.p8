@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 23
+version 27
 __lua__
 -- centers a string by adding padding to it
 function center(string)
@@ -440,6 +440,15 @@ function start()
   end
  end
 
+ if level != 4 and max_hp < 16 then
+  local c = spawn_coordinates({})
+  hp_booster = { x = c.x,
+                 y = c.y,
+                 dx = 0,
+                 dy = 0,
+                 loops = true }
+ end
+
  if level == 4 then
   boss = {
    x = map_width / 2,
@@ -654,6 +663,20 @@ function _update60()
     hp = max_hp
     sfx(3)
    end
+  end
+
+  -- get hp booster
+  if hp_booster and colliding(
+       hp_booster,
+       { x = x + 4, y = y + 4 }) and
+     hp_booster.state != "dead" then
+   hp_booster = nil
+   current_message = "shields upgraded"
+   current_message_color = 12
+   message_timer = 180
+   max_hp += 4
+   hp = max_hp
+   sfx(3)
   end
 
   -- have some octopi fire
@@ -1478,6 +1501,28 @@ function _draw()
    spr(sp, healthpack.x, healthpack.y)
   end
 
+  -- draw the hp boosters
+  if hp_booster then
+   if hp_booster.state == "dead" then
+    sp = explosion_for(hp_booster.life)
+   else
+    -- rotate colors 8 through 13
+    local shift = flr(time() * 10) % 5
+    local colors = {}
+    for i = 8, 13 do
+     if i + shift >= 13 then
+      colors[21 - i] = (i + shift) % 13 + 8
+     else
+      colors[21 - i] = i + shift
+     end
+    end
+    pal(colors)
+    sp = 42
+   end
+   spr(sp, hp_booster.x, hp_booster.y)
+   pal()
+  end
+
   -- draw the debris
   for debri in all(debris) do
    if debri.state == "dead" then
@@ -1584,6 +1629,9 @@ function _draw()
   if boss and boss.state != "dead" then
    pset(radar_x(boss.x), radar_y(boss.y), 8)
   end
+  if hp_booster and hp_booster.state != "dead" then
+   pset(radar_x(hp_booster.x), radar_y(hp_booster.y), 14)
+  end
   if flr(time() * 3) % 2 == 0 then
    pset(radar_x(x), radar_y(y), 10)
   end
@@ -1646,8 +1694,8 @@ b00b000b002bb3000002bb00003b3b00003b330003b3b30000a3b300033a0a30003b3a0000bbb300
 000323003b3a0a0a3bbb3a33b3a0a32bb3a3bbb2000003bb3a003bbbbba000a3bbb300a39a2222abaaaaaaaa0688886000000000000000000000000000000000
 00032300bb300000bbb300a33a000abb3a003b2ba0a0a3b333a3bbb3b23a0a3b3bbb3a333aa22aa3bbbbbbbb0688886000000000000000000000000000000000
 003333303b3a0a0a3b3a000ab3a0a3b3a000a3bb3a3a3b3b3b3bb3b32bb333b33b3bb3b3b39aaab30cccccc00c6886c000000000000000000000000000000000
-00b0b0b003b3a3a30bb3a0003a000a30000a3b3033bb2bb003b2bb300b3bbb3003bb2b3003b333300022220000c66c0000000000000000000000000000000000
-03003003003b3b30003b3a0003a0a33000a33300003bb20000bb200000b3b3000002bb000033b300000220000000000000000000000000000000000000000000
+00b0b0b003b3a3a30bb3a0003a000a30000a3b3033bb2bb003b2bb300b3bbb3003bb2b3003b3333000dddd0000c66c0000000000000000000000000000000000
+03003003003b3b30003b3a0003a0a33000a33300003bb20000bb200000b3b3000002bb000033b300000dd0000000000000000000000000000000000000000000
 0bb33bb0002bb0000002b000003b3b000003b330000bb20000a3b3000033aa30003b3a0003bbbb30000000000000000000000000000000000000000000000000
 000333000b22b300032b2b0003bbb3b000bbbbb3003b22b00a0a3bb0003a00a30bb3a0a00b9aa9b0000000000000000000000000000000000000000000000000
 00032300b3b2bb333b32bb303b333b2203b3bb3233bb2b3b33a0a3b303b3aa3b3b3a0a33baa22aab000000000000000000000000000000000000000000000000
