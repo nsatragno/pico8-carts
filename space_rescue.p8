@@ -103,7 +103,7 @@ function kill_enemy(enemy, explodes)
 end
 
 function damage_player(dmg)
- hit = true
+ hit = 10
  hp -= dmg
  if hp <= 0 then
   state = "dead"
@@ -282,6 +282,7 @@ function start()
  dy = 0
  a = 0
  s = 0
+ hit = 0
  camera_x = x - 56 + dx * 30
  camera_y = y - 56 + dy * 30
  fire = false
@@ -1440,9 +1441,11 @@ function _draw()
   -- draw the ship
   if state == "alive" or state == "next level" or state == "menu" or
      state == "win" then
-   if hit then
-    pal({[6] = 8, [8] = 2}, 0)
-    hit = false
+   if hit > 0 then
+    if hit % 2 == 0 then
+     pal({[6] = 8, [8] = 2}, 0)
+    end
+    hit -= 1
    end
    spr(a * 8 + 1, x, y)
    pal()
