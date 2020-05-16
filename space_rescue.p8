@@ -103,11 +103,10 @@ function kill_enemy(enemy, explodes)
 end
 
 function damage_player(dmg)
- hit = 10
+ hit = 18
  hp -= dmg
  if hp <= 0 then
   state = "dead"
-  hit = 0
   music(-1)
   sfx(2)
   time_death = 54
@@ -511,6 +510,9 @@ function _update60()
  -- i'm sorry for having to do this, i'll use oop next time
  enemy_nearby = false
  healthpack_nearby = false
+ if hit > 0 then
+  hit -= 1
+ end
 
  if message_timer > 0 then
   message_timer -= 1
@@ -1470,9 +1472,18 @@ function _draw()
  -- allow the camera to go up 8 pixels to make room for the HUD.
  camera_y = flr(mid(-12, camera_y, map_height - 124))
 
+ -- shake the camera
  if hit > 0 then
-  camera_x += rnd(4) - 2
-  camera_y += rnd(4) - 2
+  local choice = flr(hp % 4)
+  if choice == 0 then
+   camera_x += 3 - (hit % 6)
+  elseif choice == 1 then
+   camera_x -= 3 - (hit % 6)
+  elseif choice == 3 then
+   camera_y += 3 - (hit % 6)
+  else
+   camera_y -= 3 - (hit % 6)
+  end
  end
 
  camera(camera_x, camera_y)
@@ -1601,7 +1612,6 @@ function _draw()
     if hit % 2 == 0 then
      pal({[6] = 8, [8] = 2}, 0)
     end
-    hit -= 1
    end
    spr(a * 8 + 1, x, y)
    pal()
