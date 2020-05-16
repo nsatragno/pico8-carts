@@ -180,7 +180,7 @@ end
 
 function _init()
  -- reserve channels 1, 2 and 3 for music
- music(-1, 0, 14)
+ if music_on then music(-1, 0, 14) end
  game_over_messages = {
   "hahaha, git good scrub",
   "you suuuuuuuck",
@@ -255,6 +255,9 @@ function _init()
 end
 
 function restart()
+ -- difficulty goes 0, 1, 2
+ difficulty = 1
+ music_on = true
  current_message = nil
  current_message_color = nil
  message_timer = 0
@@ -529,7 +532,52 @@ function _update60()
  if state == "menu" then
   if btnp(🅾️) then
    state = "alive"
-   music(0)
+   if music_on then music(0) end
+  end
+  if btnp(❎) then
+   state = "options"
+   selected_option = 1
+  end
+  return
+ end
+
+ if state == "options" then
+  if btnp(🅾️) or btnp(➡️) or btnp(⬅️) then
+   if selected_option == 1 then
+    -- difficulty
+    if btnp(⬅️) then
+     difficulty -= 1
+    else
+     difficulty += 1
+    end
+    difficulty %= 3
+   end
+   if selected_option == 2 then
+    -- music
+    music_on = not music_on
+   end
+   if selected_option == 3 then
+    -- help
+    state = "help"
+   end
+   if selected_option == 4 then
+    -- help
+    state = "menu"
+   end
+  elseif btnp(❎) then
+   state = "menu"
+  elseif btnp(⬇️) then
+   selected_option += 1
+  elseif btnp(⬆️) then
+   selected_option -= 1
+  end
+  selected_option = mid(1, selected_option, 4)
+  return
+ end
+
+ if state == "help" then
+  if btnp(🅾️) or btnp(❎) then
+   state = "options"
   end
   return
  end
@@ -537,7 +585,7 @@ function _update60()
  if state == "next level" then
   if btnp(🅾️) then
    level += 1
-   music(0)
+   if music_on then music(0) end
    start()
    state = "alive"
   end
@@ -547,7 +595,7 @@ function _update60()
  if state == "game over" then
   if btnp(🅾️) then
    start()
-   music(0)
+   if music_on then music(0) end
    score = 0
    state = "alive"
   end
@@ -1270,7 +1318,8 @@ function print_with_color_delay(string, color, delay)
 end
 
 function print_menu(color)
- print(center("press 🅾️ to start"), 0, 37, color)
+ print(center("start    🅾️"), 0, 50, color)
+ print(center("options  ❎"), 0, 60, color)
 end
 
 function radar_x(x)
@@ -1292,6 +1341,65 @@ function _draw()
   print("         space  ", 0, 27, 8)
   print("                rescue", 0, 27, 12)
   print_menu(7)
+  return
+ end
+
+ -- options menu
+ if state == "options" then
+  print(center("options"), 0, 30, 7)
+  local options = { "   difficulty",
+                    "        music",
+                    "         help",
+                    "         back" }
+  if difficulty == 0 then
+   options[1] = options[1].." < zapp   (easy) >"
+  elseif difficulty == 1 then
+   options[1] = options[1].." < kirk (normal) >"
+  elseif difficulty == 2 then
+   options[1] = options[1].." < joker  (hard) >"
+  end
+
+  if music_on then
+   options[2] = options[2].." < blast my ears >"
+  else
+   options[2] = options[2].." <      off      >"
+  end
+
+  for i = 1, #options do
+   local c = 6
+   if i == selected_option then
+    c = 7
+    spr(1, 0, 28 + i * 10)
+   end
+   print(options[i], 0, 30 + i * 10, c)
+  end
+
+  print(center("back  ❎"), 0, 30 + (#options + 2) * 10, 7)
+  return
+ end
+
+ -- help menu
+ if state == "help" then
+  print("mission:", 8)
+  print(" rescue all stranded astronauts\n", 7)
+  print("controls:", 12)
+  print(" ⬆️ ⬇️ thrusters", 7)
+  print(" ⬅️ ➡️ maneuver", 7)
+  print(" 🅾️    fire", 7)
+  print(" ❎    radar\n", 7)
+  print("radar:", 10)
+  pset(3, 62, 10)
+  print("  your ship", 7)
+  pset(3, 68, 7)
+  print("  astronaut", 7)
+  pset(3, 74, 12)
+  print("  shield energy recharge", 7)
+  pset(3, 80, 14)
+  print("  power-up", 7)
+  pset(3, 86, 8)
+  print("  existential threat\n\n", 7)
+
+  print(center("❎ | 🅾️ back", 7))
   return
  end
 
