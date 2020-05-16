@@ -506,6 +506,7 @@ function _update60()
  -- global actions
  -- i'm sorry for having to do this, i'll use oop next time
  enemy_nearby = false
+ healthpack_nearby = false
 
  if message_timer > 0 then
   message_timer -= 1
@@ -659,6 +660,11 @@ function _update60()
 
   -- get healthpacks
   for healthpack in all(healthpacks) do
+   if not healthpack_nearby and
+    abs(healthpack.x - x + 4) <= 40 and
+    abs(healthpack.y - y + 4) <= 40 then
+    healthpack_nearby = true
+   end
    if colliding(
         healthpack,
         { x = x + 4, y = y + 4 }) and
@@ -1645,6 +1651,11 @@ function _draw()
 
   if enemy_nearby and flr(time() * 10) % 2 == 0 then
    spr(235, 88, 96, 2, 1)
+  end
+  if healthpack_nearby and flr(time() * 10) % 2 == 0 then
+   spr(234, 80, 96)
+  elseif not healthpack_nearby and #healthpacks > 0 then
+   spr(234, 80, 96)
   end
 
   for astro in all(astros) do
