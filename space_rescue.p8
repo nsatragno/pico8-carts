@@ -107,6 +107,7 @@ function damage_player(dmg)
  hp -= dmg
  if hp <= 0 then
   state = "dead"
+  hit = 0
   music(-1)
   sfx(2)
   time_death = 54
@@ -152,7 +153,7 @@ end
 
 -- returns the explosion sprite for |life|
 function explosion_for(life)
- return 22 + 6 - life \ 9
+ return 22 + (54 - life) \ 9
 end
 
 function spawn_coordinates(list)
@@ -1468,6 +1469,11 @@ function _draw()
  camera_x = flr(mid(-4, camera_x, map_width - 124))
  -- allow the camera to go up 8 pixels to make room for the HUD.
  camera_y = flr(mid(-12, camera_y, map_height - 124))
+
+ if hit > 0 then
+  camera_x += rnd(4) - 2
+  camera_y += rnd(4) - 2
+ end
 
  camera(camera_x, camera_y)
 
