@@ -11,9 +11,13 @@ end
 
 -- pads a number to the right so it takes |length| spaces
 function pad(num, length)
- local string = tostr(num)
+ local string = tostr(abs(num))
  for i = #string, length - 1 do
-  string = "0"..string
+  if i == length - 1 and num < 0 then
+   string = "-"..string
+  else
+   string = "0"..string
+  end
  end
  return string
 end
@@ -651,7 +655,9 @@ function _update60()
   if btn(⬇️) then
    s -= .03
   end
+  did_fire = false
   if btn(🅾️) and fire == false then
+   did_fire = true
    fire = true
    local l =
     sqrt(dx * dx + dy * dy)
@@ -1484,6 +1490,12 @@ function _draw()
   else
    camera_y -= 3 - (hit % 6)
   end
+ elseif state == "alive" and s > 1 then
+  camera_x += rnd(2) - 1
+  camera_y += rnd(2) - 1
+ elseif state == "alive" and did_fire then
+  camera_x += -shots[#shots].dx * 0.5
+  camera_y += -shots[#shots].dy * 0.5
  end
 
  camera(camera_x, camera_y)
