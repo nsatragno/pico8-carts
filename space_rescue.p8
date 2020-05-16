@@ -535,6 +535,7 @@ function _update60()
    if music_on then music(0) end
   end
   if btnp(❎) then
+   sfx(0)
    state = "options"
    selected_option = 1
   end
@@ -543,6 +544,7 @@ function _update60()
 
  if state == "options" then
   if btnp(🅾️) or btnp(➡️) or btnp(⬅️) then
+   sfx(0)
    if selected_option == 1 then
     -- difficulty
     if btnp(⬅️) then
@@ -565,10 +567,13 @@ function _update60()
     state = "menu"
    end
   elseif btnp(❎) then
+   sfx(24)
    state = "menu"
   elseif btnp(⬇️) then
+   sfx(24)
    selected_option += 1
   elseif btnp(⬆️) then
+   sfx(24)
    selected_option -= 1
   end
   selected_option = mid(1, selected_option, 4)
@@ -577,6 +582,7 @@ function _update60()
 
  if state == "help" then
   if btnp(🅾️) or btnp(❎) then
+   sfx(24)
    state = "options"
   end
   return
