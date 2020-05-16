@@ -262,6 +262,7 @@ function restart()
  -- difficulty goes 0, 1, 2
  difficulty = 1
  music_on = true
+ screen_shake_on = true
  current_message = nil
  current_message_color = nil
  message_timer = 0
@@ -538,6 +539,8 @@ function _update60()
 
  if state == "menu" then
   if btnp(🅾️) then
+   -- XXX don't fire when starting the game
+   fire = true
    state = "alive"
    if music_on then music(0) end
   end
@@ -566,10 +569,14 @@ function _update60()
     music_on = not music_on
    end
    if selected_option == 3 then
+    -- screen shake
+    screen_shake_on = not screen_shake_on
+   end
+   if selected_option == 4 then
     -- help
     state = "help"
    end
-   if selected_option == 4 then
+   if selected_option == 5 then
     -- help
     state = "menu"
    end
@@ -583,7 +590,7 @@ function _update60()
    sfx(24)
    selected_option -= 1
   end
-  selected_option = mid(1, selected_option, 4)
+  selected_option = mid(1, selected_option, 5)
   return
  end
 
@@ -600,6 +607,8 @@ function _update60()
    level += 1
    if music_on then music(0) end
    start()
+   -- XXX don't fire when starting the game
+   fire = true
    state = "alive"
   end
   return
@@ -610,6 +619,8 @@ function _update60()
    start()
    if music_on then music(0) end
    score = 0
+   -- XXX don't fire when starting the game
+   fire = true
    state = "alive"
   end
   return
@@ -1364,6 +1375,7 @@ function _draw()
   print(center("options"), 0, 30, 7)
   local options = { "   difficulty",
                     "        music",
+                    " screen shake",
                     "         help",
                     "         back" }
   if difficulty == 0 then
@@ -1378,6 +1390,12 @@ function _draw()
    options[2] = options[2].." < blast my ears >"
   else
    options[2] = options[2].." <      off      >"
+  end
+
+  if screen_shake_on then
+   options[3] = options[3].." < shake it baby >"
+  else
+   options[3] = options[3].." <      off      >"
   end
 
   for i = 1, #options do
@@ -1479,23 +1497,25 @@ function _draw()
  camera_y = flr(mid(-12, camera_y, map_height - 124))
 
  -- shake the camera
- if hit > 0 then
-  local choice = flr(hp % 4)
-  if choice == 0 then
-   camera_x += 3 - (hit % 6)
-  elseif choice == 1 then
-   camera_x -= 3 - (hit % 6)
-  elseif choice == 3 then
-   camera_y += 3 - (hit % 6)
-  else
-   camera_y -= 3 - (hit % 6)
+ if screen_shake_on then
+  if hit > 0 then
+   local choice = flr(hp % 4)
+   if choice == 0 then
+    camera_x += 3 - (hit % 6)
+   elseif choice == 1 then
+    camera_x -= 3 - (hit % 6)
+   elseif choice == 3 then
+    camera_y += 3 - (hit % 6)
+   else
+    camera_y -= 3 - (hit % 6)
+   end
+  elseif state == "alive" and s > 1.2 then
+   camera_x += rnd(2) - 1
+   camera_y += rnd(2) - 1
+  elseif state == "alive" and did_fire then
+   camera_x += -shots[#shots].dx * 0.5
+   camera_y += -shots[#shots].dy * 0.5
   end
- elseif state == "alive" and s > 1 then
-  camera_x += rnd(2) - 1
-  camera_y += rnd(2) - 1
- elseif state == "alive" and did_fire then
-  camera_x += -shots[#shots].dx * 0.5
-  camera_y += -shots[#shots].dy * 0.5
  end
 
  camera(camera_x, camera_y)
