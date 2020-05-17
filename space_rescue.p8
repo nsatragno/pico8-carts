@@ -271,6 +271,7 @@ function restart()
  state = "menu"
  max_hp = 8
  start()
+ music(10)
 end
 
 function start()
@@ -2051,7 +2052,7 @@ __music__
 00 1b1d1e20
 00 1f1d1e20
 00 1b1d1e20
-00 1f1d1e20
+06 1f1d1e20
 02 505f5444
 00 41424344
 00 41424344
