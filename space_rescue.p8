@@ -568,6 +568,11 @@ function _update60()
    if selected_option == 2 then
     -- music
     music_on = not music_on
+    if music_on then
+      music(10)
+    else
+      music(-1)
+    end
    end
    if selected_option == 3 then
     -- screen shake
