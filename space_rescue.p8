@@ -1,4 +1,4 @@
-pico-8 cartridge // http://www.pico-8.com
+1pico-8 cartridge // http://www.pico-8.com
 version 27
 __lua__
 -- centers a string by adding padding to it
@@ -271,7 +271,7 @@ function restart()
  state = "menu"
  max_hp = 8
  start()
- music(10)
+ toggle_music(true)
 end
 
 function start()
@@ -511,6 +511,19 @@ function particle_for(x, y, dx, dy, color)
  end
 end
 
+function toggle_music(is_menu)
+ music(-1)
+ if not music_on then return end
+
+ if is_menu then
+  music(10, 200)
+ elseif level == 4 then
+  music(16, 2000)
+ else
+  music(0, 2000)
+ end
+end
+
 function _update60()
  -- global actions
  -- i'm sorry for having to do this, i'll use oop next time
@@ -543,7 +556,7 @@ function _update60()
    -- XXX don't fire when starting the game
    fire = true
    state = "alive"
-   if music_on then music(0) end
+   toggle_music(false)
   end
   if btnp(❎) then
    sfx(0)
@@ -568,11 +581,7 @@ function _update60()
    if selected_option == 2 then
     -- music
     music_on = not music_on
-    if music_on then
-      music(10)
-    else
-      music(-1)
-    end
+    toggle_music(true)
    end
    if selected_option == 3 then
     -- screen shake
@@ -611,7 +620,7 @@ function _update60()
  if state == "next level" then
   if btnp(🅾️) then
    level += 1
-   if music_on then music(0) end
+   toggle_music(false)
    start()
    -- XXX don't fire when starting the game
    fire = true
@@ -623,7 +632,7 @@ function _update60()
  if state == "game over" then
   if btnp(🅾️) then
    start()
-   if music_on then music(0) end
+   toggle_music(false)
    score = 0
    -- XXX don't fire when starting the game
    fire = true
