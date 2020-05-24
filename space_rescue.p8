@@ -1958,11 +1958,13 @@ function _draw()
 
  -- draw the hud
  if state == "game over" then
+  rectfill(10, 44, 110, 80, 0)
   print(center("game  over"), 0, 48, 8)
   print(center("score: "..pad(score, 5)), 0, 56, 11)
   print(center(game_over_message), 0, 64, 11)
   print(center("press 🅾️ to restart level"), 0, 72, 7)
  elseif state == "next level" then
+  rectfill(10, 44, 110, 80, 0)
   print(center("level complete"), 0, 48, 8)
   print(center("score: "..pad(score, 5)), 0, 56, 11)
   print(center("press 🅾️ to continue"), 0, 72, 7)
