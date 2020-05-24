@@ -676,6 +676,9 @@ function _update60()
  end
 
  if state == "win" then
+  if btnp(🅾️) and btnp() and btnp(❎) then
+   state = "menu"
+  end
   return
  end
 
@@ -1926,10 +1929,12 @@ function _draw()
   print(center("score: "..pad(score, 5)), 0, 56, 11)
   print(center("press 🅾️ to continue"), 0, 72, 7)
  elseif state == "win" then
+  cls()
   print(center("you rescued all the pilots"), 0, 48, 8)
   print(center("humanity can fight again"), 0, 56, 12)
   print(center("thanks to you"), 0, 64, 12)
   print(center("final score: "..pad(score, 5)), 0, 72, 7)
+  print(center("🅾️ + ❎ go back to menu"), 0, 120, 7)
  else
   rectfill(0, 0, 127, 8, 0)
   if current_message then
