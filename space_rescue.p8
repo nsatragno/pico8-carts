@@ -267,7 +267,7 @@ function restart()
  current_message_color = nil
  message_timer = 0
  score = 0
- level = 2
+ level = 1
  state = "menu"
  max_hp = 8
  start()
@@ -599,10 +599,20 @@ function _update60()
     screen_shake_on = not screen_shake_on
    end
    if selected_option == 4 then
+    -- level select
+    if btnp(⬅️) then
+     level -= 1
+    else
+     level += 1
+    end
+    level = mid(1, level, 4)
+    start()
+   end
+   if selected_option == 5 then
     -- help
     state = "help"
    end
-   if selected_option == 5 then
+   if selected_option == 6 then
     -- help
     state = "menu"
    end
@@ -616,7 +626,7 @@ function _update60()
    sfx(24)
    selected_option -= 1
   end
-  selected_option = mid(1, selected_option, 5)
+  selected_option = mid(1, selected_option, 6)
   return
  end
 
@@ -1423,6 +1433,7 @@ function _draw()
   local options = { "   difficulty",
                     "        music",
                     " screen shake",
+                    "        level",
                     "         help",
                     "         back" }
   if difficulty == 0 then
@@ -1444,6 +1455,8 @@ function _draw()
   else
    options[3] = options[3].." <      off      >"
   end
+
+  options[4] = options[4].." <       "..level.."       >"
 
   for i = 1, #options do
    local c = 6
