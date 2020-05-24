@@ -1936,6 +1936,10 @@ function _draw()
    spr(234, 80, 96)
   end
 
+  if has_triple_shot then
+   spr(233, 72, 96)
+  end
+
   for astro in all(astros) do
    pset(radar_x(astro.x), radar_y(astro.y), 7)
   end
