@@ -108,6 +108,11 @@ end
 
 function damage_player(dmg)
  hit = 18
+ if dmg > 1 and difficulty == 0 then
+  dmg /= 2
+ elseif difficulty == 2 then
+  dmg *= 2
+ end
  hp -= dmg
  if hp <= 0 then
   state = "dead"
