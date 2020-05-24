@@ -676,7 +676,41 @@ function _update60()
  end
 
  if state == "win" then
-  if btnp(🅾️) and btnp() and btnp(❎) then
+  if not win_started then
+   x = -20
+   y = 0
+   a = 0
+   dx = 1
+   dy = 0
+   stars = {}
+   parts = {}
+   win_started = true
+  end
+  if flr((time() * 2000) % 2) == 0 then
+   add(parts, {
+    x = x - dx + 4,
+    y = y - dy + 4,
+    dx = -dx + rnd(.6) - .3,
+    dy = -dy + rnd(.6) - .3,
+    life = flr(rnd(20) + 20),
+    color = flr(rnd(16)),
+    loops = false,
+   })
+  end
+  update(parts)
+  x += dx
+  y += dy
+  if x > 130 then
+   a = 0.5
+   dx = -0.7
+   y = rnd(20)
+  elseif x < -30 then
+   a = 0
+   dx = 0.7
+   y = rnd(20)
+  end
+  if btnp(🅾️) and btnp(❎) then
+   win_started = false
    state = "menu"
   end
   return
@@ -1085,7 +1119,7 @@ function _update60()
    else
     boss.state = "dead"
     score += 10000
-    for i = 0, 10 do
+    for i = 1, 10 do
      add(astros, {
       x = boss.x + 8,
       y = boss.y + 8,
@@ -1561,6 +1595,10 @@ function _draw()
  camera_y = (y - 56 + camera_dy) * 0.05
           + (camera_y * 0.95)
  camera_x = flr(mid(-4, camera_x, map_width - 124))
+ if state == "win" then
+  camera_x = 0
+  camera_y = 0
+ end
  -- allow the camera to go up 8 pixels to make room for the HUD.
  camera_y = flr(mid(-12, camera_y, map_height - 124))
 
@@ -1929,7 +1967,6 @@ function _draw()
   print(center("score: "..pad(score, 5)), 0, 56, 11)
   print(center("press 🅾️ to continue"), 0, 72, 7)
  elseif state == "win" then
-  cls()
   print(center("you rescued all the pilots"), 0, 48, 8)
   print(center("humanity can fight again"), 0, 56, 12)
   print(center("thanks to you"), 0, 64, 12)
