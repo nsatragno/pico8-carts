@@ -233,7 +233,7 @@ function _init()
   "rocket maaaaaaaaaan!",
  }
  restart()
- state = "intro"
+ state = "win"
 
  intro_messages = {
   {
@@ -689,7 +689,7 @@ function _update60()
      x = 40,
      y = 100,
      dx = 0.2,
-     dy = 0,
+     dy = 0.2,
      loops = true,
      form = 1,
     },
@@ -697,7 +697,7 @@ function _update60()
      x = 60,
      y = 100,
      dx = 0.2,
-     dy = 0,
+     dy = -0.2,
      loops = true,
      form = 1,
     },
@@ -705,7 +705,7 @@ function _update60()
      x = 80,
      y = 100,
      dx = 0.2,
-     dy = 0,
+     dy = 0.2,
      loops = true,
      form = 1,
     },
@@ -727,6 +727,11 @@ function _update60()
   update(astros)
 
   for astro in all(astros) do
+   if astro.y > 103 then
+     astro.dy = -0.2
+   elseif astro.y < 97 then
+     astro.dy = 0.2
+   end
    add(parts, {
     x = astro.x - astro.dx + 4,
     y = astro.y - astro.dy + 5,
