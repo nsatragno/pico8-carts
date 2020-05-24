@@ -1892,7 +1892,7 @@ function _draw()
    if triple_shot.state == "dead" then
     sp = explosion_for(triple_shot.life)
    else
-    sp = 1
+    sp = 44 + flr(time() * 4) % 4
    end
    spr(sp, triple_shot.x, triple_shot.y)
   end
