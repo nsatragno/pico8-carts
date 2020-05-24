@@ -267,7 +267,7 @@ function restart()
  current_message_color = nil
  message_timer = 0
  score = 0
- level = 1
+ level = 2
  state = "menu"
  max_hp = 8
  start()
@@ -463,6 +463,15 @@ function start()
                  loops = true }
  end
 
+ if level == 2 or level == 3 and not has_triple_shot then
+  local c = spawn_coordinates({})
+  triple_shot = { x = c.x,
+                  y = c.y,
+                  dx = 0,
+                  dy = 0,
+                  loops = true }
+ end
+
  if level == 4 then
   boss = {
    x = map_width / 2,
@@ -545,6 +554,8 @@ function _update60()
   time_death -= 1
   if time_death <= 0 then
    state = "game over"
+   current_message = nil
+   current_message_color = nil
    sfx(1)
    game_over_message = game_over_messages[flr(rnd(#game_over_messages)) + 1]
   end
@@ -685,16 +696,24 @@ function _update60()
   if btn(🅾️) and fire == false then
    did_fire = true
    fire = true
-   local l =
-    sqrt(dx * dx + dy * dy)
-   add(shots, {
-    x = x + 4,
-    y = y + 4,
-    dx = dx / l * 3,
-    dy = dy / l * 3,
-    life = 30,
-    loops = false,
-   })
+
+   local directions
+   if has_triple_shot then
+    directions = {-1, 0, 1}
+   else
+    directions = {0}
+   end
+
+   for i in all(directions) do
+    add(shots, {
+     x = x + 4,
+     y = y + 4,
+     dx = sin(clamp(a) + i * 0.02 - .25) * 3,
+     dy = cos(clamp(a) + i * 0.02 - .25) * 3,
+     life = 30,
+     loops = false,
+    })
+   end
    sfx(0)
   elseif not btn(🅾️) then
    fire = false
@@ -778,6 +797,19 @@ function _update60()
    message_timer = 180
    max_hp += 4
    hp = max_hp
+   sfx(3)
+  end
+
+  -- get triple shot
+  if triple_shot and colliding(
+       triple_shot,
+       { x = x + 4, y = y + 4 }) and
+     triple_shot.state != "dead" then
+   triple_shot = nil
+   current_message = "acquired triple shot"
+   current_message_color = 12
+   message_timer = 180
+   has_triple_shot = true
    sfx(3)
   end
 
@@ -1524,7 +1556,7 @@ function _draw()
    else
     camera_y -= 3 - (hit % 6)
    end
-  elseif state == "alive" and s > 1.2 then
+  elseif state == "alive" and s > 1.2 and flr(time() * 20) % 4 == 0 then
    camera_x += rnd(2) - 1
    camera_y += rnd(2) - 1
   elseif state == "alive" and did_fire then
@@ -1713,6 +1745,16 @@ function _draw()
    pal()
   end
 
+  -- draw the triple shot
+  if triple_shot then
+   if triple_shot.state == "dead" then
+    sp = explosion_for(triple_shot.life)
+   else
+    sp = 1
+   end
+   spr(sp, triple_shot.x, triple_shot.y)
+  end
+
   -- draw the debris
   for debri in all(debris) do
    if debri.state == "dead" then
@@ -1846,6 +1888,9 @@ function _draw()
   end
   if hp_booster and hp_booster.state != "dead" then
    pset(radar_x(hp_booster.x), radar_y(hp_booster.y), 14)
+  end
+  if triple_shot and triple_shot.state != "dead" then
+   pset(radar_x(triple_shot.x), radar_y(triple_shot.y), 14)
   end
   if flr(time() * 3) % 2 == 0 then
    pset(radar_x(x), radar_y(y), 10)
