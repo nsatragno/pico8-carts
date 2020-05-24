@@ -338,7 +338,7 @@ function start()
                 dx = 0,
                 dy = 0,
                 loops = true,
-                form = flr(rnd(2)) }
+                form = flr(rnd(4)) }
  end
 
  debris = {}
@@ -684,6 +684,32 @@ function _update60()
    dy = 0
    stars = {}
    parts = {}
+   astros = {
+    {
+     x = 40,
+     y = 100,
+     dx = 0.2,
+     dy = 0,
+     loops = true,
+     form = 1,
+    },
+    {
+     x = 60,
+     y = 100,
+     dx = 0.2,
+     dy = 0,
+     loops = true,
+     form = 1,
+    },
+    {
+     x = 80,
+     y = 100,
+     dx = 0.2,
+     dy = 0,
+     loops = true,
+     form = 1,
+    },
+   }
    win_started = true
   end
   if flr((time() * 2000) % 2) == 0 then
@@ -698,6 +724,30 @@ function _update60()
    })
   end
   update(parts)
+  update(astros)
+
+  for astro in all(astros) do
+   add(parts, {
+    x = astro.x - astro.dx + 4,
+    y = astro.y - astro.dy + 5,
+    dx = -astro.dx + rnd(.3) - .15,
+    dy = -astro.dy + rnd(.3) - .15,
+    life = flr(rnd(5) + 10),
+    color = flr(rnd(16)),
+    loops = false,
+   })
+  end
+  if astros[3].x > 100 then
+   for astro in all(astros) do
+    astro.dx = -0.2
+    astro.form = 0
+   end
+  elseif astros[1].x < 20 then
+   for astro in all(astros) do
+    astro.dx = 0.2
+    astro.form = 1
+   end
+  end
   x += dx
   y += dy
   if x > 130 then
@@ -1767,9 +1817,13 @@ function _draw()
    if astro.state == "dead" then
     sp = explosion_for(astro.life)
    else
-    sp = 9 + astro.form
+    sp = 9 + astro.form \ 2
    end
-   spr(sp, astro.x, astro.y)
+   local flip
+   if astro.form % 2 == 0 then
+    flip = true
+   end
+   spr(sp, astro.x, astro.y, 1, 1, flip, false)
   end
 
   -- draw the healthpacks
