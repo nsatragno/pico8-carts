@@ -233,7 +233,7 @@ function _init()
   "rocket maaaaaaaaaan!",
  }
  restart()
- state = "win"
+ state = "intro"
 
  intro_messages = {
   {
