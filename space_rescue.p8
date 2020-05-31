@@ -1250,6 +1250,7 @@ function _update60()
     boss.dy = 0
     boss.shots_fired = 0
     boss.invuln = false
+    boss.loops = true
    end
   end
 
@@ -1394,7 +1395,6 @@ function _update60()
    boss.dx = 0
    boss.dy = 0
    boss.state = "flamethrower"
-   boss.loops = true
    boss.cd = 600
    boss.speed = 0.05
   end
@@ -1418,7 +1418,6 @@ function _update60()
 
    if boss.cd <= 0 then
     boss.state = "flamethrower_explosion"
-    boss.loops = false
    else
     boss.dx = v.x * boss.speed
     boss.dy = v.y * boss.speed
