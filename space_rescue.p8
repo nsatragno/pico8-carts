@@ -503,6 +503,7 @@ function start()
                   loops = true }
  end
 
+ boss_max_hp = 30
  if level == 4 then
   boss = {
    x = map_width / 2,
@@ -511,7 +512,7 @@ function start()
    dy = 0.1,
    state = "intro",
    dmg = 99,
-   hp = 30,
+   hp = boss_max_hp,
    hit = false,
    invuln = true,
    cd = 0,
@@ -2085,6 +2086,19 @@ function _draw()
   print(center("🅾️ + ❎ go back to menu"), 0, 120, 7)
  else
   rectfill(0, 0, 127, 8, 0)
+  if boss then
+   if boss.state == "intro" then
+    print(center("warning"), 0, 100, 8)
+    print(center("existential threat detected"), 0, 110, 8)
+    print(center("no refuge"), 0, 120, 8)
+   else
+    -- draw the boss hp bar
+    if boss.hp > 0 then
+     print("denuvo", 0, 120, 8)
+     rectfill(0, 126, (boss.hp * 127 / boss_max_hp), 126, 8)
+    end
+   end
+  end
   if current_message then
    rectfill(0, 121, 127, 127, 0)
    print(current_message, 2, 122, current_message_color)
