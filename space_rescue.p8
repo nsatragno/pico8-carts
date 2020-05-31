@@ -814,10 +814,26 @@ function _update60()
    state = "radar"
   end
   if btn(⬅️) then
+   if did_tap_left then
     a -= steering
-  end
-  if btn(➡️) then
-   a += steering
+   else
+    a = clamp(a)
+    a -= 0.001
+   end
+   did_tap_right = false
+   did_tap_left = true
+  elseif btn(➡️) then
+   if did_tap_right then
+    a += steering
+   else
+    a += 0.125
+   end
+   did_tap_right = true
+   did_tap_left = false
+  else
+   did_tap_right = false
+   did_tap_left = false
+   a = clamp(a)
   end
   if btn(⬆️) then
    s += .03
