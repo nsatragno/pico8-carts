@@ -521,6 +521,8 @@ function start()
    flames = {},
    loops = false,
   }
+ else
+  boss = nil
  end
 
  bullets = {}
