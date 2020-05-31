@@ -2086,19 +2086,19 @@ function _draw()
  else
   rectfill(0, 0, 127, 8, 0)
   if current_message then
-   print(current_message, 2, 2, current_message_color)
-  else
-   print("p1 "..pad(score, 5), 2, 2, 7)
-   -- draw the HP bar
-   local hp_width = 32
-   local bar_width = (hp_width - max_hp - 2) \ max_hp
-   for i = 0, hp - 1 do
-    rectfill(46 + i * (bar_width + 2), 1,
-             46 + i * (bar_width + 2) + bar_width, 7,
-             8 + i \ (max_hp \ 4))
-   end
-   print("left: "..pad(#astros, 2), 95, 2, 7)
+   rectfill(0, 121, 127, 127, 0)
+   print(current_message, 2, 122, current_message_color)
   end
+  print("p1 "..pad(score, 5), 2, 2, 7)
+  -- draw the HP bar
+  local hp_width = 32
+  local bar_width = (hp_width - max_hp - 2) \ max_hp
+  for i = 0, hp - 1 do
+   rectfill(46 + i * (bar_width + 2), 1,
+            46 + i * (bar_width + 2) + bar_width, 7,
+            8 + i \ (max_hp \ 4))
+  end
+  print("left: "..pad(#astros, 2), 95, 2, 7)
   rect(0, 0, 127, 8)
  end
 end
