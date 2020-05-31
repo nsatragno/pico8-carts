@@ -1493,8 +1493,18 @@ function _update60()
  collide_enemies(missiles, true)
  collide_enemies(healthpacks, true)
  collide_enemies(boss, true)
- collide_enemies(debris, false)
  collide_enemies(shells, true)
+
+ -- collide shots with debris
+ for shot in all(shots) do
+  for debri in all(debris) do
+   if colliding(debri, shot) then
+    debri.dx += shot.dx * 0.1
+    debri.dy += shot.dy * 0.1
+    del(shots, shot)
+   end
+  end
+ end
 
  -- collide shots with astronauts
  for shot in all(shots) do
