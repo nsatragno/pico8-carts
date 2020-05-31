@@ -862,7 +862,7 @@ function _update60()
      y = y + 4,
      dx = sin(clamp(a) + i * 0.02 - .25) * 3,
      dy = cos(clamp(a) + i * 0.02 - .25) * 3,
-     life = 30,
+     life = 35,
      loops = false,
     })
    end
