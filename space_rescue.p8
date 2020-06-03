@@ -567,6 +567,20 @@ function toggle_music(is_menu)
  end
 end
 
+function maybe_next_level()
+ if #astros <= 0 then
+  music(-1)
+  if level >= 4 then
+   state = "win"
+  else
+   state = "next level"
+   message_timer = 0
+   current_message = nil
+  end
+  return
+ end
+end
+
 function _update60()
  -- global actions
  -- i'm sorry for having to do this, i'll use oop next time
@@ -904,17 +918,7 @@ function _update60()
     current_message = messages[flr(rnd(#messages)) + 1]
     current_message_color = 12
     message_timer = 180
-    if #astros <= 0 then
-     music(-1)
-     if level >= 4 then
-      state = "win"
-     else
-      state = "next level"
-      message_timer = 0
-      current_message = nil
-     end
-     return
-    end
+    maybe_next_level()
    end
   end
 
@@ -1521,6 +1525,7 @@ function _update60()
    current_message = astro_dead_messages[flr(rnd(#astro_dead_messages)) + 1]
    current_message_color = 8
    message_timer = 180
+   maybe_next_level()
    end
   end
  end
