@@ -135,18 +135,24 @@ function update_kill(enemies, explodes)
 end
 
 function collide_enemies(enemies, explodes)
- for shot in all(shots) do
   for enemy in all(enemies) do
-   if colliding(enemy, shot) and
-      enemy.state != "dead" then
-    if not enemy.invuln then
-     kill_enemy(enemy, explodes)
-     score += 10
+   -- shots are always close to the player ship, only check for collisions
+   -- around it to save processing time
+   if abs(enemy.x - x) <= 128 and abs(enemy.y - y) <= 128 then
+    for shot in all(shots) do
+     if colliding(enemy, shot) and
+        enemy.state != "dead" then
+      if not enemy.invuln then
+       kill_enemy(enemy, explodes)
+       score += 10
+      end
+      enemy.dx += shot.dx * 0.05
+      enemy.dy += shot.dy * 0.05
+      del(shots, shot)
+     end
     end
-    del(shots, shot)
    end
   end
- end
 end
 
 -- returns whether |e1| and |e2| are colliding
@@ -1162,15 +1168,6 @@ function _update60()
   particle_for(x, y, dx, dy, 9)
  end  -- end if state == "alive" or state == "radar"
 
- -- collide shots with closed shells
- for shot in all(shots) do
-  for shell in all(shells) do
-  if colliding(shell, shot) and shell.state == "closed" then
-   del(shots, shot)
-   end
-  end
- end
-
  -- update the boss
  if boss then
   -- update all the boss' elements
@@ -1491,17 +1488,7 @@ function _update60()
  collide_enemies(healthpacks, true)
  collide_enemies(boss, true)
  collide_enemies(shells, true)
-
- -- collide shots with debris
- for shot in all(shots) do
-  for debri in all(debris) do
-   if colliding(debri, shot) then
-    debri.dx += shot.dx * 0.1
-    debri.dy += shot.dy * 0.1
-    del(shots, shot)
-   end
-  end
- end
+ collide_enemies(debris, false)
 
  -- collide shots with astronauts
  for shot in all(shots) do
