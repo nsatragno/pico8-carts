@@ -333,7 +333,7 @@ function start()
  elseif level == 2 then
   palette = {4, 10, 9, 15}
  else
-  palette = {2, 8, 9, 14}
+  palette = {2, 9, 14}
  end
  for i = 1, map_height / 100 * map_width / 10 do
   local r = flr(rnd(4))
