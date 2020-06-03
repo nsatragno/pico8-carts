@@ -97,15 +97,9 @@ end
 
 function kill_enemy(enemy, explodes)
  if explodes then
-  sfx(2)
-  enemy.life = 54
- else
-  sfx(24)
-  enemy.life = 0
+  add_explosion(enemy.x, enemy.y)
  end
- enemy.state = "dead"
- enemy.dx = 0
- enemy.dy = 0
+ enemy.life = 0
 end
 
 function damage_player(dmg)
@@ -309,12 +303,9 @@ function start()
  if level == 1 then
   map_width = 500
   map_height = 250
- elseif level == 2 then
+ elseif level == 2 or level == 3 then
   map_width = 1000
   map_height = 500
- elseif level == 3 then
-  map_width = 2000
-  map_height = 1000
  elseif level == 4 then
   map_width = 256
   map_height = 128
@@ -354,7 +345,7 @@ function start()
  astros = {}
  local astro_num = 0
  if level != 4 then
-  astro_num = 10 + level * 5
+  astro_num = min(20, 10 + (level - 1) * 5)
  end
 
  for i = 1, astro_num do
@@ -527,6 +518,18 @@ function start()
  end
 
  bullets = {}
+ explosions = {}
+end
+
+function add_explosion(x, y)
+ sfx(2)
+ add(explosions, {
+  x = x,
+  y = y,
+  dx = 0,
+  dy = 0,
+  life = 54,
+ })
 end
 
 function get_boss_phase()
@@ -571,6 +574,7 @@ function maybe_next_level()
  if #astros <= 0 then
   music(-1)
   if level >= 4 then
+   start()
    state = "win"
   else
    state = "next level"
@@ -808,8 +812,7 @@ function _update60()
    y = rnd(20)
   end
   if btnp(🅾️) and btnp(❎) then
-   win_started = false
-   state = "menu"
+   restart()
   end
   return
  end
@@ -1078,9 +1081,7 @@ function _update60()
   for missile in all(missiles) do
    if missile.state != "dead" then
     if missile.life <= 1 then
-     missile.state = "dead"
-     missile.life = 54
-     sfx(2)
+     add_explosion(missile.x, missile.y)
     elseif missile.life <= 150 then
      missile.speed = max(0.05, missile.speed - 0.01)
     else
@@ -1211,15 +1212,7 @@ function _update60()
   -- handle the boss death animation
   if boss.state == "dying" then
    if boss.cd > 0 then
-    sfx(2)
-    add(boss.explosions, {
-     life = 54,
-     x = boss.x + rnd(16),
-     y = boss.y + rnd(16),
-     dx = 0,
-     dy = 0,
-     loops = false,
-    })
+    add_explosion(boss.x + rnd(16), boss.y + rnd(16))
    else
     boss.state = "dead"
     score += 10000
@@ -1515,13 +1508,10 @@ function _update60()
   for astro in all(astros) do
   if colliding(astro, shot) and
      astro.state != "dead" then
-   sfx(2)
-   astro.state = "dead"
-   astro.life = 54
-   astro.dx = 0
-   astro.dy = 0
+   add_explosion(astro.x, astro.y)
    score -= 200
    del(shots, shot)
+   del(astros, astro)
    current_message = astro_dead_messages[flr(rnd(#astro_dead_messages)) + 1]
    current_message_color = 8
    message_timer = 180
@@ -1543,6 +1533,7 @@ function _update60()
  update(missiles)
  update(shells)
  update(healthpacks)
+ update(explosions)
  if boss then update({boss}) end
 end
 
@@ -1818,12 +1809,7 @@ function _draw()
     spr(128, boss.x, boss.y, 3, 3)
    end
 
-   if boss.state == "dying" or boss.state == "dead" then
-    -- animate the explosions
-    for explosion in all(boss.explosions) do
-     spr(explosion_for(explosion.life), explosion.x, explosion.y)
-    end
-   else
+   if boss.state != "dying" and boss.state != "dead" then
     -- animate the engines
     if flr(time() * 10) % 2 == 0 then
      clrspr(boss.x, boss.y)
@@ -1848,13 +1834,9 @@ function _draw()
 
    -- draw the boss' launched astronauts
    for astro in all(boss.astros) do
-    if astro.state == "dead" then
-     sp = explosion_for(astro.life)
-    else
-     sp = 132 + (astro.seed + time() * 3) % 4
-     if flr(time() * 4) % 2 == 0 then
-      sp += 16
-     end
+    sp = 132 + (astro.seed + time() * 3) % 4
+    if flr(time() * 4) % 2 == 0 then
+     sp += 16
     end
     spr(sp, astro.x, astro.y)
    end
@@ -1881,75 +1863,48 @@ function _draw()
 
   -- draw the astronauts
   for astro in all(astros) do
-   if astro.state == "dead" then
-    sp = explosion_for(astro.life)
-   else
-    sp = 9 + astro.form \ 2
-   end
    local flip
    if astro.form % 2 == 0 then
     flip = true
    end
-   spr(sp, astro.x, astro.y, 1, 1, flip, false)
+   spr(9 + astro.form \ 2, astro.x, astro.y, 1, 1, flip, false)
   end
 
   -- draw the healthpacks
   for healthpack in all(healthpacks) do
-   if healthpack.state == "dead" then
-    sp = explosion_for(healthpack.life)
-   else
-    sp = 43
-   end
-   spr(sp, healthpack.x, healthpack.y)
+   spr(43, healthpack.x, healthpack.y)
   end
 
   -- draw the hp boosters
   if hp_booster then
-   if hp_booster.state == "dead" then
-    sp = explosion_for(hp_booster.life)
-   else
-    -- rotate colors 8 through 13
-    local shift = flr(time() * 10) % 5
-    local colors = {}
-    for i = 8, 13 do
-     if i + shift >= 13 then
-      colors[21 - i] = (i + shift) % 13 + 8
-     else
-      colors[21 - i] = i + shift
-     end
+   -- rotate colors 8 through 13
+   local shift = flr(time() * 10) % 5
+   local colors = {}
+   for i = 8, 13 do
+    if i + shift >= 13 then
+     colors[21 - i] = (i + shift) % 13 + 8
+    else
+     colors[21 - i] = i + shift
     end
-    pal(colors)
-    sp = 42
    end
-   spr(sp, hp_booster.x, hp_booster.y)
+   pal(colors)
+   spr(42, hp_booster.x, hp_booster.y)
    pal()
   end
 
   -- draw the triple shot
   if triple_shot then
-   if triple_shot.state == "dead" then
-    sp = explosion_for(triple_shot.life)
-   else
-    sp = 44 + flr(time() * 4) % 4
-   end
-   spr(sp, triple_shot.x, triple_shot.y)
+   spr(44 + flr(time() * 4) % 4, triple_shot.x, triple_shot.y)
   end
 
   -- draw the debris
   for debri in all(debris) do
-   if debri.state == "dead" then
-    sp = explosion_for(debri.life)
-   else
-    sp = debri.sp
-   end
-   spr(sp, debri.x, debri.y)
+   spr(debri.sp, debri.x, debri.y)
   end
 
   -- draw the octopi
   for octopus in all(octopi) do
-   if octopus.state == "dead" then
-    sp = explosion_for(octopus.life)
-   elseif flr(time() * 5) % 2 == 0 then
+   if flr(time() * 5) % 2 == 0 then
     sp = 32
    else
     sp = 48
@@ -1959,9 +1914,7 @@ function _draw()
 
   -- draw the chompers
   for chomper in all(chompers) do
-   if chomper.state == "dead" then
-    sp = explosion_for(chomper.life)
-   elseif flr(time() * 5) % 2 == 0 then
+   if flr(time() * 5) % 2 == 0 then
     sp = 33 + atan2(chomper.dx, -chomper.dy) * 8
    else
     sp = 49 + atan2(chomper.dx, -chomper.dy) * 8
@@ -1971,9 +1924,7 @@ function _draw()
 
   -- draw the eyes
   for eye in all(eyes) do
-   if eye.state == "dead" then
-    sp = explosion_for(eye.life)
-   elseif eye.state == "charging" then
+   if eye.state == "charging" then
     sp = 57
    else
     sp = 41
@@ -1983,9 +1934,7 @@ function _draw()
 
   -- draw the lookouts
   for lookout in all(lookouts) do
-   if lookout.state == "dead" then
-    sp = explosion_for(lookout.life)
-   elseif lookout.state == "charged" then
+   if lookout.state == "charged" then
     sp = 71 + flr(time() * 3) % 2
    else
     sp = 73 + lookout.cd / 133
@@ -1998,9 +1947,7 @@ function _draw()
 
   -- draw the shells
   for shell in all(shells) do
-   if shell.state == "dead" then
-    sp = explosion_for(shell.life)
-   elseif shell.state == "closed" then
+   if shell.state == "closed" then
     sp = 77
    else
     sp = 76
@@ -2010,18 +1957,18 @@ function _draw()
 
   -- draw the missiles
   for missile in all(missiles) do
-   if missile.state == "dead" then
-    sp = explosion_for(missile.life)
-   else
-    sp = 80 + atan2(missile.dx, -missile.dy) * 8
-   end
-   spr(sp, missile.x, missile.y)
+   spr(80 + atan2(missile.dx, -missile.dy) * 8, missile.x, missile.y)
   end
 
   -- draw the bullets
   for bullet in all(bullets) do
    pset(bullet.x + 4,
         bullet.y + 4, 8)
+  end
+
+  -- draw the explosions
+  for explosion in all(explosions) do
+   spr(explosion_for(explosion.life), explosion.x, explosion.y)
   end
  end -- state != "radar"
 
