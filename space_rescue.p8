@@ -906,7 +906,7 @@ function _update60()
     message_timer = 180
     if #astros <= 0 then
      music(-1)
-     if level >= 3 then
+     if level >= 4 then
       state = "win"
      else
       state = "next level"
