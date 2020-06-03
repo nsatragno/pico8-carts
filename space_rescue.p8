@@ -1553,11 +1553,13 @@ function print_menu(color)
 end
 
 function radar_x(x)
- return x / (map_width / 112) + 9
+ if x < 0 or x > map_width then return -99 end
+ return x / (map_width / 109) + 9
 end
 
 function radar_y(y)
- return y / (map_height / 56) + 33
+ if y < 0 or y > map_height then return -99 end
+ return y / (map_height / 53) + 33
 end
 
 function clrspr(x, y)
