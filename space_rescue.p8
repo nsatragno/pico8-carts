@@ -1172,9 +1172,9 @@ function _update60()
  if boss then
   -- update all the boss' elements
   update(boss.explosions)
-  update(boss.astros)
   update_kill(boss.astros, true)
   collide_enemies(boss.astros, true)
+  update(boss.astros)
   update(boss.flames)
   update_kill(boss.flames, false)
 
