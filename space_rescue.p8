@@ -689,7 +689,7 @@ function _update60()
  end
 
  if state == "help" then
-  if btnp(🅾️) or btnp(❎) then
+  if btnp(❎) then
    sfx(24)
    state = "options"
   end
@@ -1535,8 +1535,8 @@ function print_with_color_delay(string, color, delay)
 end
 
 function print_menu(color)
- print(center("start    🅾️"), 0, 50, color)
- print(center("options  ❎"), 0, 60, color)
+ print(center("start           🅾️ / z"), 0, 50, color)
+ print(center("options / help  ❎ / x"), 0, 60, color)
 end
 
 function radar_x(x)
@@ -1603,35 +1603,33 @@ function _draw()
    print(options[i], 0, 30 + i * 10, c)
   end
 
-  print(center("back  ❎"), 0, 30 + (#options + 2) * 10, 7)
+  print(center("back ❎ / x"), 0, 30 + (#options + 2) * 10, 7)
   return
  end
 
  -- help menu
  if state == "help" then
-  print("mission:", 8)
-  print(" rescue all stranded astronauts\n", 7)
+  print("mission: rescue all astronauts", 8)
   print("controls:", 12)
-  print(" ⬆️ ⬇️ thrusters", 7)
-  print(" ⬅️ ➡️ maneuver", 7)
-  print(" 🅾️    fire", 7)
-  print(" ❎    radar\n", 7)
+  print(" ⬆️ ⬇️  thrusters", 7)
+  print(" ⬅️ ➡️  maneuver", 7)
+  print(" 🅾️ / z fire", 7)
+  print(" ❎ / x radar\n", 7)
   print("radar:", 10)
-  pset(3, 62, 10)
+  pset(3, 50, 10)
   print("  your ship", 7)
-  pset(3, 68, 7)
+  pset(3, 56, 7)
   print("  astronaut", 7)
-  pset(3, 74, 12)
+  pset(3, 62, 12)
   print("  shield energy recharge", 7)
-  pset(3, 80, 14)
-  print("  power-up", 7)
-  pset(3, 86, 8)
-  print("  existential threat\n", 7)
+  pset(3, 68, 14)
+  print("  power-up\n", 7)
   print("made with \135 by:", 8)
-  print(" kat at (ig @kat_acute_travesty)", 7)
-  print(" nina   (tw @nsatragno)", 7)
+  print(" art & music: kat at", 7)
+  print(" programming: nina", 7)
+  print("     testing: moon retri toby\n              sandrul puga nani\n", 7)
 
-  print(center("❎ | 🅾️ back", 7))
+  print(center("back ❎ / x", 7))
   return
  end
 
@@ -2023,18 +2021,18 @@ function _draw()
   print(center("game  over"), 0, 48, 8)
   print(center("score: "..pad(score, 5)), 0, 56, 11)
   print(center(game_over_message), 0, 64, 11)
-  print(center("press 🅾️ to restart level"), 0, 72, 7)
+  print(center("press 🅾️ / z to restart level"), 0, 72, 7)
  elseif state == "next level" then
   rectfill(10, 44, 110, 80, 0)
   print(center("level complete"), 0, 48, 8)
   print(center("score: "..pad(score, 5)), 0, 56, 11)
-  print(center("press 🅾️ to continue"), 0, 72, 7)
+  print(center("press 🅾️ / z to continue"), 0, 72, 7)
  elseif state == "win" then
   print(center("you rescued all the pilots"), 0, 48, 8)
   print(center("humanity can fight again"), 0, 56, 12)
   print(center("thanks to you"), 0, 64, 12)
   print(center("final score: "..pad(score, 5)), 0, 72, 7)
-  print(center("🅾️ + ❎ go back to menu"), 0, 120, 7)
+  print(center("🅾️ / z + ❎ / x restart"), 0, 120, 7)
  else
   rectfill(0, 0, 127, 8, 0)
   if boss then
