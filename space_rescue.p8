@@ -436,7 +436,7 @@ function start()
  missiles = {}
  local lookouts_num = 0
  if level == 3 then
-  lookouts_num = 20
+  lookouts_num = 12
  end
  for i = 1, lookouts_num do
   local c = spawn_coordinates(lookouts)
@@ -454,7 +454,7 @@ function start()
  shells = {}
  local shells_num = 0
  if level == 3 then
-  shells_num = 20
+  shells_num = 12
  end
  for i = 1, shells_num do
   local c = spawn_coordinates(shells)
