@@ -235,6 +235,7 @@ function _init()
   "rocket maaaaaaaaaan!",
  }
  restart()
+ has_triple_shot = true
  state = "intro"
 
  intro_messages = {
@@ -328,6 +329,7 @@ function start()
  camera_x = x - 56 + dx * 30
  camera_y = y - 56 + dy * 30
  fire = false
+ fire_charge = 0
 
  parts = {}
  shots = {}
@@ -549,14 +551,15 @@ function get_boss_phase()
  end
 end
 
-function particle_for(x, y, dx, dy, color)
+function particle_for(x, y, dx, dy, color, life)
+ if not life then life = flr(rnd(10) + 10) end
  if flr((time() * 1000) % 2) == 0 then
   add(parts, {
-   x = x - dx + 4,
-   y = y - dy + 4,
+   x = flr(x) - dx + 4,
+   y = flr(y) - dy + 4,
    dx = -dx + rnd(.6) - .3,
    dy = -dy + rnd(.6) - .3,
-   life = flr(rnd(10) + 10),
+   life = life,
    color = color,
    loops = false,
   })
@@ -589,6 +592,20 @@ function maybe_next_level()
   end
   return
  end
+end
+
+function shoot(directions)
+ for i in all(directions) do
+  add(shots, {
+   x = x + 4,
+   y = y + 4,
+   dx = sin(clamp(a) + i * 0.02 - .25) * 3,
+   dy = cos(clamp(a) + i * 0.02 - .25) * 3,
+   life = 35,
+   loops = false,
+  })
+ end
+ sfx(0)
 end
 
 function _update60()
@@ -868,30 +885,46 @@ function _update60()
    s -= .03
   end
   did_fire = false
-  if btn(🅾️) and fire == false then
-   did_fire = true
-   fire = true
+  if btn(🅾️) then
+   if fire then
+    -- player is holding fire
+    fire_charge += 1
 
-   local directions
-   if has_triple_shot then
-    directions = {-1, 0, 1}
+    if fire_charge == 30 then
+     sfx(5)
+    end
+    if fire_charge >= 30 then
+     if fire_charge < 120 or fire_charge % 4 == 0 then
+      particle_for(x, y, -(sin(clamp(a) - .25) + dx), -(cos(clamp(a) - .25) + dy), 12, 12)
+     end
+    end
    else
-    directions = {0}
+    did_fire = true
+    -- player pushed fire for the first time
+    fire = true
+    if has_triple_shot then
+     shoot({-1, 0, 1})
+    else
+     shoot({0})
+    end
    end
-
-   for i in all(directions) do
-    add(shots, {
-     x = x + 4,
-     y = y + 4,
-     dx = sin(clamp(a) + i * 0.02 - .25) * 3,
-     dy = cos(clamp(a) + i * 0.02 - .25) * 3,
-     life = 35,
-     loops = false,
-    })
-   end
-   sfx(0)
   elseif not btn(🅾️) then
+   if fire_charge > 120 then
+    -- super shot
+    local directions = {}
+    local multiplier
+    if has_triple_shot then
+     multiplier = 2
+    else
+     multiplier = 1
+    end
+    for i = -2 * multiplier, 2 * multiplier, 0.25 do
+     add(directions, i)
+    end
+    shoot(directions)
+   end
    fire = false
+   fire_charge = 0
   end
  end
 
@@ -1832,10 +1865,11 @@ function _draw()
   -- draw the ship
   if state == "alive" or state == "next level" or state == "menu" or
      state == "win" then
-   if hit > 0 then
-    if hit % 2 == 0 then
-     pal({[6] = 8, [8] = 2}, 0)
-    end
+   if hit > 0 and hit % 2 == 0 then
+    pal({[6] = 8, [8] = 2}, 0)
+   end
+   if fire_charge > 120 then
+    pal({[6] = 12}, 0)
    end
    spr(a * 8 + 1, x, y)
    pal()
