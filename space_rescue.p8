@@ -98,6 +98,8 @@ end
 function kill_enemy(enemy, explodes)
  if explodes then
   add_explosion(enemy.x, enemy.y)
+ else
+  sfx(24)
  end
  enemy.life = 0
 end
