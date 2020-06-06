@@ -1778,6 +1778,17 @@ function _draw()
 
   -- draw the boss
   if boss then
+   if boss.x - camera_x < -12 or boss.x - camera_x > 128 or
+      boss.y - camera_y < -12 or boss.y - camera_y > 128 then
+    -- the boss is out of bounds, draw an indicator
+    local v = normalize(x - boss.x - 8, y - boss.y - 8)
+    local rx = x + 4 - (v.x * 25)
+    local ry = y + 4 - (v.y * 25)
+    clip(rx - 3 - camera_x, ry - 3 - camera_y, 6, 6)
+    circ(x + 4, y + 4, 25, 8)
+    clip()
+   end
+
    -- draw the launched flames
    for flame in all(boss.flames) do
     spr(23, flame.x, flame.y)
