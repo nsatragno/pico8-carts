@@ -609,6 +609,15 @@ function shoot(directions)
  sfx(0)
 end
 
+function mute_sfx(n)
+ for i = 16, 19 do
+  if stat(i) == n then
+   sfx(-1, i - 16)
+   return
+  end
+ end
+end
+
 function _update60()
  -- global actions
  -- i'm sorry for having to do this, i'll use oop next time
@@ -910,6 +919,7 @@ function _update60()
     end
    end
   elseif not btn(🅾️) then
+   mute_sfx(5)
    if fire_charge > 120 then
     -- super shot
     local directions = {}
@@ -1647,7 +1657,7 @@ function _draw()
   print("controls:", 12)
   print(" ⬆️ ⬇️  thrusters", 7)
   print(" ⬅️ ➡️  maneuver", 7)
-  print(" 🅾️ / z fire", 7)
+  print(" 🅾️ / z fire (hold to charge)", 7)
   print(" ❎ / x radar\n", 7)
   print("radar:", 10)
   pset(3, 50, 10)
@@ -1747,7 +1757,7 @@ function _draw()
   elseif state == "alive" and s > 1.2 and flr(time() * 20) % 4 == 0 then
    camera_x += rnd(2) - 1
    camera_y += rnd(2) - 1
-  elseif state == "alive" and did_fire then
+  elseif state == "alive" and did_fire and #shots > 0 then
    camera_x += -shots[#shots].dx * 0.5
    camera_y += -shots[#shots].dy * 0.5
   end
