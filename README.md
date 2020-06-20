@@ -7,3 +7,5 @@ Nina's PICO-8 carts
 
 Rescue (or kill!) the stranded astronauts in this top-down shooter inspired by
 asteroids. Four levels including a final boss.
+
+Art by Kat (ig: @kat\_acute\_travesty).
