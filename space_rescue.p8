@@ -1671,7 +1671,7 @@ function _draw()
   print("made with \135 by:", 8)
   print(" art & music: kat at", 7)
   print(" programming: nina", 7)
-  print("     testing: moon retri toby\n              sandrul puga nani\n", 7)
+  print("     testing: moon toby\n      sarah sandrul puga nani\n", 7)
 
   print(center("back ❎ / x", 7))
   return
