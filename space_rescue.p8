@@ -581,6 +581,7 @@ function maybe_next_level()
   if level >= 4 then
    start()
    state = "win"
+   boss = nil
   else
    state = "next level"
    message_timer = 0
