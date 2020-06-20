@@ -195,35 +195,31 @@ function _init()
  -- reserve channels 1, 2 and 3 for music
  if music_on then music(-1, 0, 14) end
  game_over_messages = {
-  "hahaha, git good scrub",
-  "you suuuuuuuck",
-  "git good, noob",
-  "l2p  scrub",
-  "get duuuuuuuunked on",
+  "the galaxy is counting on you!",
+  "i'm sure you can do better!",
+  "that was so close!",
+  "you can do this!",
+  "we're all counting on you!",
  }
  astro_dead_messages = {
-  "you're supposed to rescue them",
-  "you suck at your job",
-  "actually i never liked them",
-  "are you blind or something?",
-  "how did you get your license?",
-  "bruh, not cool man",
-  "you were the chosen one!",
+  "don't shoot the astronauts :(",
+  "please don't kill astronauts",
+  "that was not an alien",
+  "astronauts aren't for shooting",
+  "that guy was counting on you",
+  "bruh, not cool",
+  "i never really liked that guy",
  }
  messages = {
   "i saw an alien eat a man whole",
   "i thought i wasn't making it",
   "i'm glad you came for me",
-  "it's too bad they didn't live",
   "i miss my girlfriend",
   "my oxygen was running low",
   "i was so scared",
   "i thought i was going to die",
   "thank you fellow 'human'!",
-  "actually i wanted to die",
-  "took you long enough",
-  "this ship is too small, mate",
-  "this scrap you call ship?",
+  "how are we all going to fit?",
   "spaaaaaaaaaaaace",
   "no te molestes en traducir esto",
   "beam me up scotty",
@@ -234,7 +230,6 @@ function _init()
   "you only do this for the points",
   "good news everyone!",
   "need saving? why not zoidberg?",
-  "rocket maaaaaaaaaan!",
  }
  restart()
  state = "intro"
