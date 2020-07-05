@@ -3,6 +3,49 @@ version 29
 __lua__
 -- space kludge
 -- by kat and nina
+
+function create_player()
+  return {
+    x = 0,
+    y = 0,
+
+    draw = function(self)
+      spr(0, self.x, self.y)
+    end,  -- player:draw
+
+    update = function(self)
+      if btn(➡️) then
+        self.x += 1
+      end
+      if btn(⬅️) then
+        self.x -= 1
+      end
+      if btn(⬇️) then
+        self.y += 1
+      end
+      if btn(⬆️) then
+        self.y -= 1
+      end
+    end,  -- player:update
+  }
+end  -- create_player
+
+function _init()
+  g_actors = { create_player() }
+end  -- _init()
+
+function _update60()
+  for actor in all(g_actors) do
+    actor:update()
+  end
+end  -- _update60
+
+function _draw()
+  cls()
+  for actor in all (g_actors) do
+    actor:draw()
+  end
+end  -- _draw
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
