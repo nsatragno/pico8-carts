@@ -321,6 +321,14 @@ function create_door(x, y, size)
     pixels_up = 0,
     direction = 1,
 
+    get_rects = function(self)
+      local rects = {}
+      for i = 0, (size - 1) do
+        add(rects, {x = self.x, y = self.y + i * 8})
+      end
+      return rects
+    end,  -- door:get_rects
+
     update = function(self)
       if self.direction == -1 and self.pixels_up < size * 8 then
         self.pixels_up += 1
@@ -342,8 +350,8 @@ function create_door(x, y, size)
     end,  -- door:draw
 
     collides_with = function(self, x, y)
-      for i = 0, (size - 1) do
-        if colliding_p_r({x = x, y = y}, {x = self.x, y = self.y + i * 8}) then
+      for rect in all(self:get_rects()) do
+        if colliding_p_r({x = x, y = y}, rect) then
           return true
         end
       end
@@ -353,6 +361,11 @@ function create_door(x, y, size)
       if on then
         self.direction = -1
       else
+        for rect in all(self:get_rects()) do
+          if colliding_r_player(rect) then
+            g_player:take_damage(100)
+          end
+        end
         self.direction = 1
       end
     end,  -- door:toggle
