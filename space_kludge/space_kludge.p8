@@ -4,10 +4,23 @@ __lua__
 -- space kludge
 -- by kat and nina
 
-function colliding(point, rect)
+function colliding_p_r(point, rect)
   return point.x >= rect.x and point.x <= rect.x + 8 and
          point.y >= rect.y and point.y <= rect.y + 8
 end  -- colliding
+
+function colliding_r_r(rect1, rect2)
+  return rect1.x <= rect2.x + 8 and
+         rect1.x + 8 >= rect2.x and
+         rect1.y <= rect2.y + 8 and
+         rect1.y + 8 >= rect2.y
+end
+
+function colliding_r_player(rect)
+  -- the player is two rectangles stacked on top of each other
+  return colliding_r_r(g_player, rect) or
+         colliding_r_r({x = g_player.x, y = g_player.y + 8}, rect)
+end
 
 function create_player()
   return {
@@ -19,15 +32,23 @@ function create_player()
     inventory = {},
     show_inventory = false,
     equipped_item = nil,
+    hp = 6,
 
     -- the number of frames you can hold the jump button to go higher
     jump_ticks = 0,
 
     draw = function(self)
-      spr(0, self.x, self.y, 1, 2)
+      -- todo draw proper death animation
+      if self.hp > 0 then
+        spr(0, self.x, self.y, 1, 2)
+      end
     end,  -- player:draw
 
     update = function(self)
+      if self.hp <= 0 then
+        return
+      end
+
       if btnp(❎) then
         self.show_inventory = not self.show_inventory
         self.selected_index = 0
@@ -143,6 +164,10 @@ function create_player()
       end
       camera(g_camera.x, g_camera.y)
     end,  -- player:draw_inventory
+
+    take_damage = function(self, damage)
+      self.hp -= damage
+    end,  -- player:take_damage
   }
 end  -- create_player
 
@@ -205,7 +230,7 @@ function create_extinguisher()
 
           for actor in all(g_actors) do
             if actor.name == "fire" then
-              if colliding(self, actor) then
+              if colliding_p_r(self, actor) then
                 actor:take_damage(1)
                 return true
               end
@@ -229,6 +254,7 @@ function create_enemy(x, y, name, hp)
     dy = 0,
     name = name,
     hp = hp,
+    damage = 1,
 
     update = function(self)
       if self.hp <= 0 then
@@ -238,7 +264,9 @@ function create_enemy(x, y, name, hp)
       self.x += self.dx
       self.y += self.dy
 
-      -- todo hurt player
+      if colliding_r_player(self) then
+        g_player:take_damage(self.damage)
+      end
     end,  -- enemy:update()
 
     take_damage = function(self, damage)
