@@ -6,7 +6,7 @@ __lua__
 
 function create_player()
   return {
-    x = 0,
+    x = 64,
     y = 70,
     dx = 0,
     dy = 0.2,
@@ -81,7 +81,9 @@ function create_player()
 end  -- create_player
 
 function _init()
-  g_actors = { create_player() }
+  g_player = create_player()
+  g_actors = { g_player }
+
   g_map = {
     draw = function(self)
       map(0, 0, 0, 0, 128, 64)
@@ -96,6 +98,37 @@ function _init()
       return { x = (x \ 8) * 8, y = (y \ 8) * 8 }
     end,  -- map:coordinates_for
   }
+
+  g_camera = {
+    x = 0,
+    y = 0,
+
+    update = function(self, player)
+      if player.dx > 0 and player.x - self.x > 30 then
+        -- the player is moving to the right
+        if player.x - self.x - player.dx - 1 <= 30 then
+          self.x = player.x - 30
+        else
+          self.x += player.dx + 1
+        end
+      elseif player.dx < 0 and player.x - self.x < 98 then
+        -- the player is moving to the left
+        if player.x - self.x - player.dx + 1 >= 98 then
+          self.x = player.x - 98
+        else
+          self.x += player.dx - 1
+        end
+      end
+    end,  -- camera:update
+
+    set = function(self)
+      camera(self.x, self.y)
+    end,  -- camera:set
+
+    reset = function(self)
+      camera()
+    end,  -- camera:reset
+  }
 end  -- _init()
 
 function _update60()
@@ -106,7 +139,10 @@ end  -- _update60
 
 function _draw()
   cls()
+  g_camera:reset(g_player)
   print(stat(7).."fps")
+  g_camera:update(g_player)
+  g_camera:set()
   g_map:draw()
   for actor in all (g_actors) do
     actor:draw()
