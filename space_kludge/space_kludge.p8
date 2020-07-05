@@ -7,7 +7,7 @@ __lua__
 function create_player()
   return {
     x = 64,
-    y = 70,
+    y = 80,
     dx = 0,
     dy = 0.2,
 
