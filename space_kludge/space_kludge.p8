@@ -363,7 +363,11 @@ function create_door(x, y, size)
       else
         for rect in all(self:get_rects()) do
           if colliding_r_player(rect) then
-            g_player:take_damage(100)
+            if g_player.x < rect.x + 4 then
+              g_player.x = rect.x - 8
+            else
+              g_player.x = rect.x + 8
+            end
           end
         end
         self.direction = 1
