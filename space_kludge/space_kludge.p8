@@ -10,6 +10,7 @@ function create_player()
     y = 80,
     dx = 0,
     dy = 0.2,
+    facing = 1,
     inventory = {},
     show_inventory = false,
     equipped_item = nil,
@@ -43,8 +44,10 @@ function create_player()
       else
         if btn(➡️) then
           self.dx = 1
+          self.facing = 1
         elseif btn(⬅️) then
           self.dx = -1
+          self.facing = -1
         else
           self.dx = 0
         end
@@ -83,6 +86,7 @@ function create_player()
         local item = g_map:get_item(point.x, point.y)
         if item then
           add(self.inventory, item)
+          self.equipped_item = item
         end
       end
 
@@ -165,12 +169,43 @@ function create_dialog(messages)
 end  -- create_dialog
 
 function create_extinguisher()
-  add(g_player.inventory, {
+  return {
     name = "fire extinguisher",
     use = function()
-      printh("fire e")
+      printh("use fire e")
+      local x_offset = 0
+      if g_player.facing == 1 then
+        x_offset = 8
+      end
+      add(g_actors, {
+        x = g_player.x + x_offset,
+        y = g_player.y + 8,
+        dx = g_player.facing + rnd(2) - 1,
+        dy = rnd(1),
+        life = 30,
+        color = flr(rnd(2)) + 6,
+
+        update = function(self)
+          self.life -= 1
+          if self.life <= 0 then
+            return true
+          end
+          if g_map:is_solid(self.x + self.dx, self.y) then
+            self.dx *= -1
+          end
+          if g_map:is_solid(self.x, self.y + self.dy) then
+            self.dy *= -1
+          end
+          self.x += self.dx
+          self.y += self.dy
+        end,  -- extinguisher_particle:update
+
+        draw = function(self)
+          pset(self.x, self.y, self.color)
+        end,  -- extinguisher_particle:draw
+      })
     end,  -- extinguisher:use
-  })
+  }
 end  -- create_extinguisher
 
 function _init()
