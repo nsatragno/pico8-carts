@@ -351,15 +351,20 @@ function create_door(x, y, size)
     end,  -- door:update
 
     draw = function(self)
+      palt(0, false)
       clip(x - flr(g_camera.x), y - flr(g_camera.y), 8, 8 * size)
       for i = 0, (size - 1) do
         local sprite = 38
         if i >= 1 then
           sprite += 16
         end
+        if self.direction == -1 then
+          sprite += 1
+        end
         spr(sprite, x, y + i * 8 - self.pixels_up)
       end
       clip()
+      palt()
     end,  -- door:draw
 
     collides_with = function(self, x, y)
