@@ -122,14 +122,6 @@ function _init()
 
       self.y = player.y - 64
     end,  -- camera:update
-
-    set = function(self)
-      camera(self.x, self.y)
-    end,  -- camera:set
-
-    reset = function(self)
-      camera()
-    end,  -- camera:reset
   }
 end  -- _init()
 
@@ -141,10 +133,10 @@ end  -- _update60
 
 function _draw()
   cls()
-  g_camera:reset(g_player)
+  camera()
   print(stat(7).."fps")
   g_camera:update(g_player)
-  g_camera:set()
+  camera(g_camera.x, g_camera.y)
   g_map:draw()
   for actor in all (g_actors) do
     actor:draw()
