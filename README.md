@@ -1,6 +1,8 @@
 Nina's PICO-8 carts
 ===================
 
+[See the new project site!](https://nsatragno.github.io/pico8-carts/)
+
 ## Space Rescue (finished!)
 
 ![Space Rescue screenshot](https://raw.githubusercontent.com/nsatragno/pico8-carts/master/space_rescue/space_rescue_banner.png)
