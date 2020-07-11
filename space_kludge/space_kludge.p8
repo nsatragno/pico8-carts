@@ -310,7 +310,9 @@ function create_jetpack(x, y)
         x_offset = 8
       end
 
-      create_particle(g_player.x + x_offset, g_player.y + 8, -g_player.facing * rnd(0.3), 1.5 + rnd(0.5), 30, 2)
+      create_particle(g_player.x + x_offset, g_player.y + 8,
+                      -g_player.facing * rnd(0.3), 1.5 + rnd(0.5),
+                      30, 2)
     end,  -- jetpack:use
   }
 end  -- create_jetpack
