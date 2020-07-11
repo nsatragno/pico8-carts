@@ -129,7 +129,7 @@ function create_player()
       end
 
       if not on_floor then
-        -- downwards acceleration
+        -- downwards acceleration (gravity)
         self.dy = min(self.dy + 0.1, 3)
       end
 
@@ -220,6 +220,42 @@ function create_dialog(messages)
   }
 end  -- create_dialog
 
+function create_particle(x, y, dx, dy, life, color)
+  local particle = {
+    x = x,
+    y = y,
+    dx = dx,
+    dy = dy,
+    life = life,
+    color = color,
+
+    update = function(self)
+      self.life -= 1
+      if self.life <= 0 then
+        return true
+      end
+      if g_map:is_solid(self.x + self.dx, self.y) then
+        self.dx *= -1
+      end
+      if g_map:is_solid(self.x, self.y + self.dy) then
+        self.dy *= -1
+      end
+      self.x += self.dx
+      self.y += self.dy
+
+      if self._update then
+        return self._update()
+      end
+    end,  -- particle:update
+
+    draw = function(self)
+      pset(self.x, self.y, self.color)
+    end,  -- particle:draw
+  }
+  add(g_actors, particle)
+  return particle
+end  -- create_particle
+
 function create_extinguisher(x, y)
   return {
     x = x,
@@ -234,28 +270,11 @@ function create_extinguisher(x, y)
       if g_player.facing == 1 then
         x_offset = 8
       end
-      add(g_actors, {
-        x = g_player.x + x_offset,
-        y = g_player.y + 8,
-        dx = g_player.facing + rnd(2) - 1,
-        dy = rnd(1),
-        life = 30,
-        color = flr(rnd(2)) + 6,
-
-        update = function(self)
-          self.life -= 1
-          if self.life <= 0 then
-            return true
-          end
-          if g_map:is_solid(self.x + self.dx, self.y) then
-            self.dx *= -1
-          end
-          if g_map:is_solid(self.x, self.y + self.dy) then
-            self.dy *= -1
-          end
-          self.x += self.dx
-          self.y += self.dy
-
+      local particle = create_particle(
+        g_player.x + x_offset, g_player.y + 8,
+        g_player.facing + rnd(2) - 1, rnd(1),
+        30, flr(rnd(2)) + 6)
+        particle._update = function(self)
           for actor in all(g_actors) do
             if actor.name == "fire" then
               if colliding_p_r(self, actor) then
@@ -264,15 +283,37 @@ function create_extinguisher(x, y)
               end
             end
           end
-        end,  -- extinguisher_particle:update
-
-        draw = function(self)
-          pset(self.x, self.y, self.color)
-        end,  -- extinguisher_particle:draw
-      })
+      end  -- extinguisher_particle:update
     end,  -- extinguisher:use
   }
 end  -- create_extinguisher
+
+function create_jetpack(x, y)
+  return {
+    x = x,
+    y = y,
+    fuel = 1000,
+    pickable = true,
+    name = "jetpack",
+    draw = function()
+      spr(36, x, y)
+    end,  -- jetpack:draw
+    use = function(self)
+      self.fuel -= 1
+      if self.fuel <= 0 then
+        return true
+      end
+      g_player.dy -= 0.12
+      g_player.dy = min(-0.8, g_player.dy)
+      local x_offset = 0
+      if g_player.facing == -1 then
+        x_offset = 8
+      end
+
+      create_particle(g_player.x + x_offset, g_player.y + 8, -g_player.facing * rnd(0.3), 1.5 + rnd(0.5), 30, 2)
+    end,  -- jetpack:use
+  }
+end  -- create_jetpack
 
 function create_enemy(x, y, name, hp)
   return {
@@ -464,6 +505,9 @@ function _init()
   }, g_actors[#g_actors])))
   add(g_actors, create_door(554, 40, 3))
   add(g_actors, create_switch(562, 56, g_actors[#g_actors]))
+
+  add(g_actors, create_extinguisher(164, 112))
+  add(g_actors, create_jetpack(124, 112))
 
   g_map = {
     draw = function(self)
