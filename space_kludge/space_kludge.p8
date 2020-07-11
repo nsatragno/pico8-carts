@@ -494,24 +494,11 @@ function _init()
     x = g_player.x - 64,
     y = g_player.y - 64,
 
-    update = function(self, player)
-      if player.dx > 0 and player.x - self.x > 30 then
-        -- the player is moving to the right
-        if player.x - self.x - player.dx - 1 <= 30 then
-          self.x = player.x - 30
-        else
-          self.x += player.dx + 1
-        end
-      elseif player.dx < 0 and player.x - self.x < 98 then
-        -- the player is moving to the left
-        if player.x - self.x - player.dx + 1 >= 98 then
-          self.x = player.x - 98
-        else
-          self.x += player.dx - 1
-        end
-      end
-
-      self.y = player.y - 64
+    update = function(self)
+      local target_x = g_player.x - 64
+      local target_y = g_player.y - 64
+      self.x = self.x + (target_x - self.x) * 0.3
+      self.y = self.y + (target_y - self.y) * 0.3
     end,  -- camera:update
   }
 
@@ -549,7 +536,7 @@ end  -- _update60
 
 function _draw()
   cls()
-  g_camera:update(g_player)
+  g_camera:update()
   camera(g_camera.x, g_camera.y)
   g_map:draw()
   for actor in all (g_actors) do
