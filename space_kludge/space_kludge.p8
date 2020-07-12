@@ -54,7 +54,8 @@ function create_player()
     inventory = {},
     show_inventory = false,
     equipped_item = nil,
-    hp = 6,
+    -- todo find good number
+    hp = 6000,
 
     -- the number of frames you can hold the jump button to go higher
     jump_ticks = 0,
@@ -235,7 +236,7 @@ function create_player()
 
     take_damage = function(self, damage)
       self.hp -= damage
-      self.dy = -1
+      self.dy = -0.5
     end,  -- player:take_damage
   }
 end  -- create_player
