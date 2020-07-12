@@ -4,6 +4,28 @@ __lua__
 -- space kludge
 -- by kat and nina
 
+k_max_safe_number = sqrt(0x7fff)
+function normalize(x, y)
+ local l
+ -- prevent overflow
+ if x >= k_max_safe_number or
+    x <= -k_max_safe_number or
+    y >= k_max_safe_number or
+    y <= -k_max_safe_number then
+  local nx = x * 0x0.01
+  local ny = y * 0x0.01
+  l = sqrt(nx * nx + ny * ny) * 0x100
+ else
+  l = sqrt(x * x + y * y)
+ end
+
+ return { x = x / l, y = y / l }
+end
+
+function vector_to_player(element)
+ return normalize(g_player.x - element.x, g_player.y - element.y)
+end
+
 function colliding_p_r(point, rect)
   return point.x >= rect.x and point.x <= rect.x + 8 and
          point.y >= rect.y and point.y <= rect.y + 8
@@ -55,6 +77,8 @@ function create_player()
         return
       end
 
+      self.in_space = g_map:is_space(self.x + 4, self.y + 8)
+
       if btnp(❎) then
         self.show_inventory = not self.show_inventory
         self.selected_index = 0
@@ -74,14 +98,16 @@ function create_player()
         end
         self.selected_index = mid(1, self.selected_index, #self.inventory)
       else
-        if btn(➡️) then
-          self.dx = 1
-          self.facing = 1
-        elseif btn(⬅️) then
-          self.dx = -1
-          self.facing = -1
-        else
-          self.dx = 0
+        if not self.in_space then
+          if btn(➡️) then
+            self.dx = 1
+            self.facing = 1
+          elseif btn(⬅️) then
+            self.dx = -1
+            self.facing = -1
+          else
+            self.dx = 0
+          end
         end
 
         for actor in all(g_actors) do
@@ -94,6 +120,15 @@ function create_player()
           end
         end
       end
+
+      if not self.in_space then
+        if btn(⬇️) then
+          self.dy += 0.4
+        end
+        -- downwards acceleration (gravity)
+        self.dy += 0.1
+      end
+      self.dy = min(self.dy, 3)
 
       local points = {
         { x = self.x, y = self.y + 15 },
@@ -131,11 +166,6 @@ function create_player()
             del(g_actors, actor)
           end
         end
-      end
-
-      if not on_floor then
-        -- downwards acceleration (gravity)
-        self.dy = min(self.dy + 0.1, 3)
       end
 
       self.x += self.dx
@@ -188,6 +218,102 @@ function create_player()
     end,  -- player:take_damage
   }
 end  -- create_player
+
+function create_denuvo(x, y, dx, dy)
+  return {
+    x = x,
+    y = y,
+    dx = dx,
+    dy = dy,
+    state = "flying",
+    damaged_points = {},
+
+    update = function(self)
+      if self.state == "flying" then
+        self.x += self.dx
+        self.y += self.dy
+        -- todo remove when out of bounds
+        local points = {
+          {
+            x = self.x + 4,
+            y = self.y
+          },
+          {
+            x = self.x + 8,
+            y = self.y + 4
+          },
+          {
+            x = self.x + 4,
+            y = self.y + 8
+          },
+          {
+            x = self.x,
+            y = self.y + 4
+          },
+        }
+        for point in all(points) do
+          local sprite = g_map:get_sprite(point.x, point.y)
+          if fget(sprite, 0) then
+            self.state = "attached"
+            self.attached_to = g_map:clamp(point.x, point.y)
+          end
+        end
+      elseif self.state == "attached" then
+        create_particle(self.x + 4, self.y + 4, rnd(2) - 1, rnd(2) - 1, 20, 2)
+        if flr(time() * 10) % 2 == 0 then
+          add(self.damaged_points, {
+            x = self.attached_to.x + rnd(8), y = self.attached_to.y + rnd(8)
+          })
+          if #self.damaged_points >= 100 then
+            self.state = "flying"
+            self.dx = -dx
+            self.dy = -dy
+            mset(self.attached_to.x \ 8, self.attached_to.y \ 8, 0)
+            add(g_actors, create_hull_puncture(
+              self.attached_to.x, self.attached_to.y, self.dx, self.dy))
+          end
+        end
+      end
+    end,  -- denuvo:update
+
+    draw = function(self)
+      spr(32, self.x, self.y)
+      if self.state == "attached" then
+        for damaged_point in all(self.damaged_points) do
+          pset(damaged_point.x, damaged_point.y, 0)
+        end
+      end
+    end,  -- denuvo:draw
+  }
+end  -- create_denuvo
+
+function create_hull_puncture(x, y, dx, dy)
+  return {
+    update = function()
+      if flr(time() * 10) % 2 == 0 then
+        create_particle(x + rnd(8), y + rnd(8), dx, dy, 30, 4)
+      end
+      if not g_player.in_space and
+         abs(g_player.x - x) < 50 and
+         abs(g_player.y - y) < 50 then
+        if dx == 0 and flr(g_player.x) != flr(x) then
+          g_player.x -= sgn(g_player.x - x) * 0.2
+        else
+          g_player.x += dx
+        end
+        if dy == 0 then
+          g_player.y -= sgn(g_player.y - y) * 0.2
+        else
+          g_player.dy = dy * 2
+        end
+      end
+    end,  -- hull_puncture:update
+
+    draw = function()
+      -- todo draw a sprite
+    end,  -- hull_puncture:draw
+  }
+end
 
 function create_dialog(messages)
   return {
@@ -550,6 +676,8 @@ function _init()
   add(g_actors, create_extinguisher(164, 112))
   add(g_actors, create_jetpack(124, 112))
 
+  add(g_actors, create_denuvo(120, 0, 0, 0.2))
+
   g_map = {
     draw = function(self)
       map(0, 0, 0, 0, 128, 64)
@@ -570,6 +698,10 @@ function _init()
       end
     end,  -- map:is_solid
 
+    is_space = function(self, x, y)
+      return self:get_sprite(x, y) == 0
+    end,  -- map:is_space
+
     clamp = function(self, x, y)
       return { x = (x \ 8) * 8, y = (y \ 8) * 8 }
     end,  -- map:coordinates_for
@@ -580,10 +712,8 @@ function _init()
     y = g_player.y - 64,
 
     update = function(self)
-      local target_x = g_player.x - 64
-      local target_y = g_player.y - 64
-      self.x = self.x + (target_x - self.x) * 0.3
-      self.y = self.y + (target_y - self.y) * 0.3
+      self.x = g_player.x - 64
+      self.y = g_player.y - 64
     end,  -- camera:update
   }
 
