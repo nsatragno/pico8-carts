@@ -366,7 +366,9 @@ function create_dialog(messages)
       camera()
       rectfill(0, 0, 127, 15, 12)
       print(self.current_message, 18, 2, 7)
+      palt(0, false)
       spr(self.messages[1].sprite, 0, 0, 2, 2)
+      palt()
       camera(g_camera.x, g_camera.y)
     end,  -- dialog:draw
   }
