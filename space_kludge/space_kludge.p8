@@ -549,9 +549,6 @@ function create_door(x, y, size)
         if i >= 1 then
           sprite += 16
         end
-        if self.direction == -1 then
-          sprite += 1
-        end
         spr(sprite, x, y + i * 8 - self.pixels_up)
       end
       clip()
