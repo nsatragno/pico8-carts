@@ -113,16 +113,21 @@ function create_player()
         if not self.in_space then
           if btn(➡️) then
             movement_ticks += 1
-            self.dx = 1
+            self.dx += 0.25
             self.facing = 1
           elseif btn(⬅️) then
             movement_ticks += 1
-            self.dx = -1
+            self.dx -= 0.25
             self.facing = -1
           else
             movement_ticks = 0
-            self.dx = 0
+            if self.dx > 0 then
+              self.dx -= 0.125
+            elseif self.dx < 0 then
+              self.dx += 0.125
+            end
           end
+          self.dx = mid(-1, self.dx, 1)
         end
 
         for actor in all(g_actors) do
@@ -145,21 +150,20 @@ function create_player()
       end
       self.dy = min(self.dy, 3)
 
-      -- this sucks
-      -- todo make this better
       local points = {
-        { x = self.x, y = self.y + 15 },
-        { x = self.x + 7, y = self.y + 15 },
-        { x = self.x, y = self.y + 7 },
-        { x = self.x + 7, y = self.y + 7 },
-        { x = self.x, y = self.y },
-        { x = self.x + 7, y = self.y },
+        { x = 0, y = 15 },
+        { x = 7, y = 15 },
+        { x = 0, y = 7 },
+        { x = 7, y = 7 },
+        { x = 0, y = 0 },
+        { x = 7, y = 0 },
       }
       local on_floor = false
       for point in all(points) do
         -- vertical collisions
-        if g_map:is_solid(point.x, point.y + sgn(self.dy)) then
-          local tile_y = g_map:clamp(point.x, point.y + sgn(self.dy)).y
+        if g_map:is_solid(point.x + self.x, point.y + self.dy + self.y) then
+          local tile_y = g_map:clamp(
+            point.x + self.x, point.y + self.dy + self.y).y
           if self.dy < 0 then
             -- hit a ceiling
             self.y = tile_y + 8
@@ -172,7 +176,7 @@ function create_player()
         end
 
         -- horizontal collisions
-        if g_map:is_solid(point.x + sgn(self.dx), point.y) then
+        if g_map:is_solid(point.x + self.dx + self.x, point.y + self.y) then
           self.dx = 0
         end
 
@@ -314,12 +318,12 @@ function create_hull_puncture(x, y, dx, dy)
          abs(g_player.x - x) < 50 and
          abs(g_player.y - y) < 50 then
         if dx == 0 and flr(g_player.x) != flr(x) then
-          g_player.x -= sgn(g_player.x - x) * 0.2
+          g_player.dx -= sgn(g_player.x - x) * 0.15
         else
-          g_player.x += dx
+          g_player.dx = dx
         end
         if dy == 0 then
-          g_player.y -= sgn(g_player.y - y) * 0.2
+          g_player.dy = sgn(g_player.y - y) * 0.2
         else
           g_player.dy = dy * 2
         end
@@ -690,7 +694,7 @@ function _init()
   add(g_actors, create_extinguisher(164, 112))
   add(g_actors, create_jetpack(124, 112))
 
-  --add(g_actors, create_denuvo(120, 0, 0, 0.2))
+  add(g_actors, create_denuvo(120, 0, 0, 0.2))
 
   g_map = {
     draw = function(self)
@@ -1011,7 +1015,7 @@ a666a666a664944499449444994494449944944499449444994494449946a666a666a666a666a666
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 
 __gff__
-0001000000000000000000000000000000000000000000000000000000000000000000000000010100000000000000000000000000000101000000000000000001010101010101010100000000000000010101010100000000000000000000000000000100000000000000000000000001010000000000000000000000000000
+0001000000000000000000000000000000000000000000000000000000000000000000000000010100000000000000000000000000000101000000000000000001010101010101010100000000000000010101010100000000000000000000000000000000000000000000000000000001010000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
