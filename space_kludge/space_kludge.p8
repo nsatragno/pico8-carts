@@ -46,8 +46,8 @@ end
 
 function create_player()
   return {
-    x = 88,
-    y = 114,
+    x = 40,
+    y = 40,
     dx = 0,
     dy = 0.2,
     facing = 1,
@@ -112,15 +112,15 @@ function create_player()
       else
         if not self.in_space then
           if btn(➡️) then
-            movement_ticks += 1
+            self.movement_ticks += 1
             self.dx += 0.25
             self.facing = 1
           elseif btn(⬅️) then
-            movement_ticks += 1
+            self.movement_ticks += 1
             self.dx -= 0.25
             self.facing = -1
           else
-            movement_ticks = 0
+            self.movement_ticks = 0
             if self.dx > 0 then
               self.dx -= 0.125
             elseif self.dx < 0 then
@@ -312,7 +312,29 @@ function create_hull_puncture(x, y, dx, dy)
   return {
     update = function()
       if flr(time() * 10) % 2 == 0 then
-        create_particle(x + rnd(8), y + rnd(8), dx, dy, 30, 4)
+        local x_offset
+        if dx == 0 then
+          x_offset = rnd(20) - 10
+        else
+          x_offset = rnd(20) * -sgn(dx)
+        end
+        if dy == 0 then
+          y_offset = rnd(20) - 10
+        else
+          y_offset = rnd(20) * -sgn(dy)
+        end
+
+        local particle = create_particle(
+          x + rnd(8) + x_offset, y + rnd(8) + y_offset,
+          dx, dy, 30, 4)
+        particle._update = function(self)
+          if g_map:is_space(self.x, self.y) then
+            return
+          end
+          local vector = normalize(x - self.x, y - self.y)
+          self.dx += vector.x * 0.1
+          self.dy += vector.y * 0.1
+        end
       end
       if not g_player.in_space and
          abs(g_player.x - x) < 50 and
@@ -398,7 +420,7 @@ function create_particle(x, y, dx, dy, life, color)
       self.y += self.dy
 
       if self._update then
-        return self._update()
+        return self:_update()
       end
     end,  -- particle:update
 
@@ -696,7 +718,7 @@ function _init()
   add(g_actors, create_extinguisher(164, 112))
   add(g_actors, create_jetpack(124, 112))
 
-  --add(g_actors, create_denuvo(120, 0, 0, 0.2))
+  add(g_actors, create_denuvo(120, 0, 0, 0.2))
 
   g_map = {
     draw = function(self)
