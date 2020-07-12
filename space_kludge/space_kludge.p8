@@ -133,7 +133,7 @@ function create_player()
 
         for actor in all(g_actors) do
           if actor.activatable and
-             colliding_p_r({x = self.x + 4, y = self.y + 8}, actor) then
+             colliding_p_r({x = flr(self.x) + 4, y = flr(self.y) + 8}, actor) then
             if btnp(⬇️) then
               actor:activate()
             end
