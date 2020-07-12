@@ -145,6 +145,8 @@ function create_player()
       end
       self.dy = min(self.dy, 3)
 
+      -- this sucks
+      -- todo make this better
       local points = {
         { x = self.x, y = self.y + 15 },
         { x = self.x + 7, y = self.y + 15 },
