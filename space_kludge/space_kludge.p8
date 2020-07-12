@@ -281,8 +281,8 @@ function create_denuvo(x, y, dx, dy)
           end
         end
       elseif self.state == "attached" then
-        create_particle(self.x + 4, self.y + 4, rnd(2) - 1, rnd(2) - 1, 20, 2)
         if flr(time() * 10) % 2 == 0 then
+          create_particle(self.x + 4, self.y + 4, rnd(2) - 1, rnd(2) - 1, 20, 2)
           add(self.damaged_points, {
             x = self.attached_to.x + rnd(8), y = self.attached_to.y + rnd(8)
           })
@@ -312,6 +312,15 @@ end  -- create_denuvo
 function create_hull_puncture(x, y, dx, dy)
   return {
     update = function()
+      -- move all particles towards puncture
+      for particle in all(g_actors) do
+        if particle.is_particle and not g_map:is_space(particle.x, particle.y) then
+          local vector = normalize(x - particle.x + 4, y - particle.y + 4)
+          particle.dx += vector.x * 0.1
+          particle.dy += vector.y * 0.1
+        end
+      end
+
       if flr(time() * 10) % 4 == 0 then
         local x_offset
         if dx == 0 then
@@ -325,20 +334,9 @@ function create_hull_puncture(x, y, dx, dy)
           y_offset = rnd(50) * -sgn(dy)
         end
 
-        local particle = create_particle(
+        create_particle(
           x + rnd(8) + x_offset, y + rnd(8) + y_offset,
           dx, dy, 60, 7)
-        particle._update = function(self)
-          if g_map:is_solid(self.x, self.y) then
-            return true
-          end
-          if g_map:is_space(self.x, self.y) then
-            return
-          end
-          local vector = normalize(x - self.x + 4, y - self.y + 4)
-          self.dx += vector.x * 0.1
-          self.dy += vector.y * 0.1
-        end
       end
       if not g_player.in_space and
          abs(g_player.x - x) < 50 and
@@ -408,10 +406,12 @@ function create_particle(x, y, dx, dy, life, color)
     dy = dy,
     life = life,
     color = color,
+    is_particle = true,
 
     update = function(self)
       self.life -= 1
-      if self.life <= 0 then
+      if self.life <= 0 or
+         g_map:is_solid(self.x, self.y) then
         return true
       end
       if g_map:is_solid(self.x + self.dx, self.y) then
@@ -498,9 +498,11 @@ function create_jetpack(x, y)
         x_offset = 8
       end
 
-      create_particle(g_player.x + x_offset, g_player.y + 8,
-                      -g_player.facing * rnd(0.3), 1.5 + rnd(0.5),
-                      30, 2)
+      if flr(time()) * 5 % 5 == 0 then
+        create_particle(g_player.x + x_offset, g_player.y + 8,
+                        -g_player.facing * rnd(0.3), 1.5 + rnd(0.5),
+                        30, 2)
+      end
     end,  -- jetpack:use
   }
 end  -- create_jetpack
@@ -718,7 +720,7 @@ function _init()
   add(g_actors, create_fire(128, 64))
   add(g_actors, create_fire(136, 64))
 
-  add(g_actors, create_denuvo(120, 0, 0, 0.2))
+  --add(g_actors, create_denuvo(120, 0, 0, 0.2))
 
   g_map = {
     draw = function(self)
