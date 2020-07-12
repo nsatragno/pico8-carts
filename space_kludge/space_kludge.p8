@@ -700,7 +700,10 @@ function _init()
 
   g_map = {
     draw = function(self)
+      palt(0, false)
+      palt(14, true)
       map(0, 0, 0, 0, 128, 64)
+      palt()
     end,  -- map:draw
 
     get_sprite = function(self, x, y)
