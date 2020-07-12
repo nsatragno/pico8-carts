@@ -528,6 +528,10 @@ function create_enemy(x, y, name, hp)
       if colliding_r_player(self) then
         g_player:take_damage(self.damage)
       end
+
+      if self._update then
+        return self:_update()
+      end
     end,  -- enemy:update()
 
     take_damage = function(self, damage)
@@ -607,11 +611,8 @@ function create_door(x, y, size)
     end,  -- door:draw
 
     collides_with = function(self, x, y)
-      for rect in all(self:get_rects()) do
-        if colliding_p_r({x = x, y = y}, rect) then
-          return true
-        end
-      end
+      return x >= self.x and x <= self.x + 8 and
+             y >= self.y and y <= self.y + 8 * size
     end,  -- door:collides_with_player
 
     toggle = function(self, on)
@@ -635,6 +636,12 @@ end  -- create_door
 
 function create_fire(x, y)
   local fire = create_enemy(x, y, "fire", 8)
+
+  fire._update = function()
+    if flr(time() * 40) % 2 == 0 then
+      create_particle(x + 4, y + 4, rnd(2) - 1, rnd(1) - 1, 20, 5)
+    end
+  end  -- fire:update
 
   fire.draw = function(self)
     local sprite = 56 + flr(time() * 10 + x) % 3
