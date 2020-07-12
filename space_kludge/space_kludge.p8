@@ -47,7 +47,7 @@ end
 function create_player()
   return {
     x = 40,
-    y = 40,
+    y = 50,
     dx = 0,
     dy = 0.2,
     facing = 1,
@@ -450,7 +450,7 @@ function create_extinguisher(x, y)
     pickable = true,
     name = "fire extinguisher",
     draw = function(self)
-      draw_item(self, 36)
+      draw_item(self, 32)
     end,  -- extinguisher:draw
     use = function()
       local x_offset = 0
@@ -483,7 +483,7 @@ function create_jetpack(x, y)
     pickable = true,
     name = "jetpack",
     draw = function(self)
-      draw_item(self, 36)
+      draw_item(self, 33)
     end,  -- jetpack:draw
     use = function(self)
       self.fuel -= 1
@@ -548,7 +548,7 @@ function create_switch(x, y, target)
       if self.on then
         pal({[8] = 11})
       end
-      spr(37, self.x, self.y)
+      spr(48, self.x, self.y)
       pal()
     end,  -- switch:draw
 
@@ -631,21 +631,13 @@ function create_door(x, y, size)
 end  -- create_door
 
 function create_fire(x, y)
-  local fire = create_enemy(x, y, "fire", 12)
+  local fire = create_enemy(x, y, "fire", 8)
 
   fire.draw = function(self)
-    local sprite
-    if self.hp > 8 then
-      sprite = 108
-    elseif self.hp > 4 then
-      sprite = 109
-    else
-      sprite = 110
-    end
-    if flr(time() * 10) % 2 == 0 then
-      sprite += 16
-    end
-    spr(sprite, self.x, self.y)
+    local sprite = 56 + flr(time() * 10 + x) % 3
+    clip(x - flr(g_camera.x), y - flr(g_camera.y), 8, 8)
+    spr(sprite, self.x, self.y + 8 - self.hp)
+    clip()
   end  -- fire:draw
   return fire
 end  -- create_fire
@@ -694,32 +686,36 @@ function _init()
     })
   end
 
-  add(g_actors, create_door(144, 104, 2))
-  add(g_actors, create_switch(136, 112, create_tutorial_script({
+  add(g_actors, create_door(80, 48, 2))
+  add(g_actors, create_switch(72, 56, create_tutorial_script({
     {
       text = "jump (⬆️) to make it\nthrough the cargo",
-      sprite = 32,
+      sprite = 5,
       persistent = true,
     }
   }, g_actors[#g_actors])))
-  add(g_actors, create_switch(152, 112, g_actors[#g_actors - 1]))
+  add(g_actors, create_switch(88, 56, g_actors[#g_actors - 1]))
   add(g_actors, create_door(512, 40, 3))
   add(g_actors, create_switch(504, 56, create_tutorial_script({
     {
       text = "make haste!\ni need to use that toilet!",
-      sprite = 32,
+      sprite = 5,
     },
     {
       text = "use the teleporter to\nquickly get there",
-      sprite = 32,
+      sprite = 5,
       persistent = true,
     },
   }, g_actors[#g_actors])))
   add(g_actors, create_door(554, 40, 3))
   add(g_actors, create_switch(562, 56, g_actors[#g_actors]))
 
-  add(g_actors, create_extinguisher(164, 112))
-  add(g_actors, create_jetpack(124, 112))
+  add(g_actors, create_extinguisher(50, 56))
+  add(g_actors, create_jetpack(60, 56))
+
+  add(g_actors, create_fire(120, 64))
+  add(g_actors, create_fire(128, 64))
+  add(g_actors, create_fire(136, 64))
 
   add(g_actors, create_denuvo(120, 0, 0, 0.2))
 
@@ -768,19 +764,19 @@ function _init()
   g_dialog = create_dialog({
     {
       text = "amber! amber! wake up!\nwe have an emergency!",
-      sprite = 32,
+      sprite = 5,
     },
     {
       text = "the toilet in cargo bay c\nis clogged again!",
-      sprite = 32,
+      sprite = 5,
     },
     {
       text = "can you go take a look?",
-      sprite = 32,
+      sprite = 5,
     },
     {
       text = "open (⬇️) that door and get\nthere quick!",
-      sprite = 32,
+      sprite = 5,
       persistent = true,
     },
   })
