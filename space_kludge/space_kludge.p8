@@ -44,6 +44,15 @@ function colliding_r_player(rect)
          colliding_r_r({x = g_player.x, y = g_player.y + 8}, rect)
 end
 
+player_collision_points = {
+  { x = 0, y = 15 },
+  { x = 7, y = 15 },
+  { x = 0, y = 7 },
+  { x = 7, y = 7 },
+  { x = 0, y = 0 },
+  { x = 7, y = 0 },
+}
+
 function create_player()
   return {
     x = 40,
@@ -151,16 +160,8 @@ function create_player()
       end
       self.dy = min(self.dy, 3)
 
-      local points = {
-        { x = 0, y = 15 },
-        { x = 7, y = 15 },
-        { x = 0, y = 7 },
-        { x = 7, y = 7 },
-        { x = 0, y = 0 },
-        { x = 7, y = 0 },
-      }
       local on_floor = false
-      for point in all(points) do
+      for point in all(player_collision_points) do
         -- vertical collisions
         if g_map:is_solid(point.x + self.x, point.y + self.dy + self.y) then
           local tile_y = g_map:clamp(
@@ -576,14 +577,6 @@ function create_door(x, y, size)
     pixels_up = 0,
     direction = 1,
 
-    get_rects = function(self)
-      local rects = {}
-      for i = 0, (size - 1) do
-        add(rects, {x = self.x, y = self.y + i * 8})
-      end
-      return rects
-    end,  -- door:get_rects
-
     update = function(self)
       if self.direction == -1 and self.pixels_up < size * 8 then
         self.pixels_up += 1
@@ -613,18 +606,18 @@ function create_door(x, y, size)
     collides_with = function(self, x, y)
       return x >= self.x and x <= self.x + 8 and
              y >= self.y and y <= self.y + 8 * size
-    end,  -- door:collides_with_player
+    end,  -- door:collides_with
 
     toggle = function(self, on)
       if on then
         self.direction = -1
       else
-        for rect in all(self:get_rects()) do
-          if colliding_r_player(rect) then
-            if g_player.x < rect.x + 4 then
-              g_player.x = rect.x - 9
+        for point in all(player_collision_points) do
+          if self:collides_with(point.x + g_player.x, point.y + g_player.y) then
+            if g_player.x < x + 4 then
+              g_player.x = x - 8
             else
-              g_player.x = rect.x + 10
+              g_player.x = x + 9
             end
           end
         end
