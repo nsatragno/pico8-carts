@@ -42,9 +42,15 @@ function create_player()
       if self.hp > 0 then
         spr(0, self.x, self.y, 1, 2, self.facing != 1)
       end
+      if self.hint then
+        local y = get_sine_wave(self.y - 6, 1.5)
+        rectfill(self.x, y + 1, self.x + 6, y + 3, 0)
+        print(self.hint, self.x, y, 7)
+      end
     end,  -- player:draw
 
     update = function(self)
+      self.hint = nil
       if self.hp <= 0 then
         return
       end
@@ -78,13 +84,13 @@ function create_player()
           self.dx = 0
         end
 
-        if btnp(⬇️) then
-          for actor in all(g_actors) do
-            if actor.activatable and
-               colliding_p_r({x = self.x + 4, y = self.y + 8}, actor) then
+        for actor in all(g_actors) do
+          if actor.activatable and
+             colliding_p_r({x = self.x + 4, y = self.y + 8}, actor) then
+            if btnp(⬇️) then
               actor:activate()
-              return
             end
+            self.hint = "⬇️"
           end
         end
       end
@@ -255,8 +261,12 @@ function create_particle(x, y, dx, dy, life, color)
   return particle
 end  -- create_particle
 
+function get_sine_wave(y, multiplier)
+  return y + sin(time() / 2) * multiplier - 2
+end  -- get_sine_wave
+
 function draw_item(item, sprite)
-  spr(sprite, item.x, item.y + sin(time() / 2) * 2.2 - 2)
+  spr(sprite, item.x, get_sine_wave(item.y, 2.2))
 end  -- draw_item
 
 function create_extinguisher(x, y)
