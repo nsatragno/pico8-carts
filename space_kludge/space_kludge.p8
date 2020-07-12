@@ -59,10 +59,22 @@ function create_player()
     -- the number of frames you can hold the jump button to go higher
     jump_ticks = 0,
 
+    -- the number of frames the player held an arrow key
+    movement_ticks = 0,
+
     draw = function(self)
       -- todo draw proper death animation
       if self.hp > 0 then
-        spr(0, self.x, self.y, 1, 2, self.facing != 1)
+        local top_sprite = 0
+        local bottom_sprite = 16 + movement_ticks / 5 % 4
+
+        if self.jump_ticks > 0 then
+          top_sprite = 4
+          bottom_sprite = 20
+        end
+
+        spr(top_sprite, self.x, self.y, 1, 1, self.facing != 1)
+        spr(bottom_sprite, self.x, self.y + 8, 1, 1, self.facing != 1)
       end
       if self.hint then
         local y = get_sine_wave(self.y - 6, 1.5)
@@ -100,12 +112,15 @@ function create_player()
       else
         if not self.in_space then
           if btn(➡️) then
+            movement_ticks += 1
             self.dx = 1
             self.facing = 1
           elseif btn(⬅️) then
+            movement_ticks += 1
             self.dx = -1
             self.facing = -1
           else
+            movement_ticks = 0
             self.dx = 0
           end
         end
@@ -673,7 +688,7 @@ function _init()
   add(g_actors, create_extinguisher(164, 112))
   add(g_actors, create_jetpack(124, 112))
 
-  add(g_actors, create_denuvo(120, 0, 0, 0.2))
+  --add(g_actors, create_denuvo(120, 0, 0, 0.2))
 
   g_map = {
     draw = function(self)
