@@ -122,7 +122,6 @@ function create_player()
         for actor in all(g_actors) do
           if actor.pickable and colliding_r_player(actor) then
             add(self.inventory, actor)
-            self.equipped_item = actor
             del(g_actors, actor)
           end
         end
@@ -159,20 +158,20 @@ function create_player()
 
     draw_inventory = function(self)
       camera()
-      rectfill(18, 28, 120, 100, 0)
-      rect(17, 27, 121, 101, 1)
-      print("inventory", 40, 30, 7)
+      rectfill(8, 28, 120, 100, 0)
+      rect(7, 27, 121, 101, 1)
+      print("inventory", 46, 30, 7)
       for i = 1, #self.inventory do
-        print(self.inventory[i].name, 40, 30 + i * 10, 7)
+        print(self.inventory[i].name, 30, 30 + i * 10, 7)
         if i == self.selected_index then
-          spr(0, 22, 30 + i * 10)
+          print(">", 12, 30 + i * 10)
         end
         if self.equipped_item == self.inventory[i] then
-          print("e", 32, 30 + i * 10, 8)
+          print("e", 22, 30 + i * 10, 8)
         end
       end
       if #self.inventory <= 0 then
-        print("[empty]", 40, 40, 7)
+        print("[empty]", 30, 40, 7)
       end
       camera(g_camera.x, g_camera.y)
     end,  -- player:draw_inventory
