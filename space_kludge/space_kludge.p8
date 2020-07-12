@@ -77,7 +77,7 @@ function create_player()
         spr(bottom_sprite, self.x, self.y + 8, 1, 1, self.facing != 1)
       end
       if self.hint then
-        local y = get_sine_wave(self.y - 6, 1.5)
+        local y = flr(get_sine_wave(flr(self.y) - 6, 1))
         rectfill(self.x, y + 1, self.x + 6, y + 3, 0)
         print(self.hint, self.x, y, 7)
       end
@@ -411,11 +411,11 @@ function create_particle(x, y, dx, dy, life, color)
 end  -- create_particle
 
 function get_sine_wave(y, multiplier)
-  return y + sin(time() / 2) * multiplier - 2
+  return y + sin(time() / multiplier) * multiplier - multiplier + 0.5
 end  -- get_sine_wave
 
 function draw_item(item, sprite)
-  spr(sprite, item.x, get_sine_wave(item.y, 2.2))
+  spr(sprite, item.x, get_sine_wave(item.y, 2))
 end  -- draw_item
 
 function create_extinguisher(x, y)
@@ -696,7 +696,7 @@ function _init()
   add(g_actors, create_extinguisher(164, 112))
   add(g_actors, create_jetpack(124, 112))
 
-  add(g_actors, create_denuvo(120, 0, 0, 0.2))
+  --add(g_actors, create_denuvo(120, 0, 0, 0.2))
 
   g_map = {
     draw = function(self)
