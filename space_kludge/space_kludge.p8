@@ -622,9 +622,9 @@ function create_door(x, y, size)
         for rect in all(self:get_rects()) do
           if colliding_r_player(rect) then
             if g_player.x < rect.x + 4 then
-              g_player.x = rect.x - 8
+              g_player.x = rect.x - 9
             else
-              g_player.x = rect.x + 9
+              g_player.x = rect.x + 10
             end
           end
         end
@@ -727,7 +727,7 @@ function _init()
   add(g_actors, create_fire(128, 64))
   add(g_actors, create_fire(136, 64))
 
-  --add(g_actors, create_denuvo(120, 0, 0, 0.2))
+  add(g_actors, create_denuvo(120, 0, 0, 0.2))
 
   g_map = {
     draw = function(self)
