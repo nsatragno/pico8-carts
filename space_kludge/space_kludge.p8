@@ -484,6 +484,32 @@ function _init()
   g_player = create_player()
   g_actors = {}
 
+  g_background = {
+    stars = {},
+
+    update = function(self)
+      for star in all(self.stars) do
+        star.x -= .4 * star.scale
+        if star.x < 0 then
+          star.x = 1024
+        end
+      end
+    end,  -- background:update
+
+    draw = function(self)
+      for star in all(self.stars) do
+        pset(star.x, star.y, 7)
+      end
+    end,  -- background:draw
+  }
+  for i = 0, 500 do
+    add(g_background.stars, {
+      x = rnd(1024),
+      y = rnd(512),
+      scale = rnd(1)
+    })
+  end
+
   add(g_actors, create_door(144, 104, 2))
   add(g_actors, create_switch(136, 112, create_tutorial_script({
     {
@@ -573,6 +599,7 @@ function _init()
 end  -- _init()
 
 function _update60()
+  g_background:update()
   for actor in all(g_actors) do
     if actor.update and actor:update() then
       del(g_actors, actor)
@@ -584,6 +611,7 @@ function _draw()
   cls()
   g_camera:update()
   camera(g_camera.x, g_camera.y)
+  g_background:draw()
   g_map:draw()
   for actor in all (g_actors) do
     actor:draw()
