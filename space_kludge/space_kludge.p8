@@ -66,7 +66,7 @@ function create_player()
       -- todo draw proper death animation
       if self.hp > 0 then
         local top_sprite = 0
-        local bottom_sprite = 16 + movement_ticks / 5 % 4
+        local bottom_sprite = 16 + self.movement_ticks / 5 % 4
 
         if self.jump_ticks > 0 then
           top_sprite = 4
