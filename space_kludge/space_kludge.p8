@@ -311,27 +311,30 @@ end  -- create_denuvo
 function create_hull_puncture(x, y, dx, dy)
   return {
     update = function()
-      if flr(time() * 10) % 2 == 0 then
+      if flr(time() * 10) % 4 == 0 then
         local x_offset
         if dx == 0 then
-          x_offset = rnd(20) - 10
+          x_offset = rnd(50) - 25
         else
-          x_offset = rnd(20) * -sgn(dx)
+          x_offset = rnd(50) * -sgn(dx)
         end
         if dy == 0 then
-          y_offset = rnd(20) - 10
+          y_offset = rnd(50) - 25
         else
-          y_offset = rnd(20) * -sgn(dy)
+          y_offset = rnd(50) * -sgn(dy)
         end
 
         local particle = create_particle(
           x + rnd(8) + x_offset, y + rnd(8) + y_offset,
-          dx, dy, 30, 4)
+          dx, dy, 60, 7)
         particle._update = function(self)
+          if g_map:is_solid(self.x, self.y) then
+            return true
+          end
           if g_map:is_space(self.x, self.y) then
             return
           end
-          local vector = normalize(x - self.x, y - self.y)
+          local vector = normalize(x - self.x + 4, y - self.y + 4)
           self.dx += vector.x * 0.1
           self.dy += vector.y * 0.1
         end
