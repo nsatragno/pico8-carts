@@ -735,8 +735,8 @@ function _init()
       if fget(self:get_sprite(x, y), 0) then
         return true
       end
-      for actor in all(g_actors) do
-        if actor.is_solid and actor:collides_with(x, y) then
+      for solid in all(e_solids) do
+        if solid:collides_with(x, y) then
           return true
         end
       end
@@ -796,16 +796,24 @@ end  -- _update60
 
 function _draw()
   cls()
+  e_solids = {}
+  for actor in all(g_actors) do
+    if actor.is_solid then
+      add(e_solids, actor)
+    end
+  end
   g_camera:update()
   camera(g_camera.x, g_camera.y)
   g_background:draw()
   g_map:draw()
-  for actor in all (g_actors) do
+  for actor in all(g_actors) do
     actor:draw()
   end
   if g_player.show_inventory then
     g_player:draw_inventory()
   end
+  camera()
+  print(stat(7), 0, 40, 7)
 end  -- _draw
 __gfx__
 0090900000909000000990000090900000909000000000ffffff4466ddd1111dd1700000000007ff000000000000000000000000000000000000000000000000
