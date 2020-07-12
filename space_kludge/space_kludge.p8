@@ -256,14 +256,18 @@ function create_particle(x, y, dx, dy, life, color)
   return particle
 end  -- create_particle
 
+function draw_item(item, sprite)
+  spr(sprite, item.x, item.y + sin(time() / 2) * 2.2 - 2)
+end  -- draw_item
+
 function create_extinguisher(x, y)
   return {
     x = x,
     y = y,
     pickable = true,
     name = "fire extinguisher",
-    draw = function()
-      spr(36, x, y)
+    draw = function(self)
+      draw_item(self, 36)
     end,  -- extinguisher:draw
     use = function()
       local x_offset = 0
@@ -295,8 +299,8 @@ function create_jetpack(x, y)
     fuel = 1000,
     pickable = true,
     name = "jetpack",
-    draw = function()
-      spr(36, x, y)
+    draw = function(self)
+      draw_item(self, 36)
     end,  -- jetpack:draw
     use = function(self)
       self.fuel -= 1
