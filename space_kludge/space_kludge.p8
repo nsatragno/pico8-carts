@@ -22,6 +22,10 @@ function normalize(x, y)
  return { x = x / l, y = y / l }
 end
 
+function clip_absolute(x, y, width, height)
+  clip(x - flr(g_camera.x), y - flr(g_camera.y), width, height)
+end
+
 function vector_to_player(element)
  return normalize(g_player.x - element.x, g_player.y - element.y)
 end
@@ -72,30 +76,46 @@ function create_player()
     -- the number of frames the player held an arrow key
     movement_ticks = 0,
 
+    -- the death ticks animation
+    death_ticks = 0,
+
     draw = function(self)
       -- todo draw proper death animation
-      if self.hp > 0 then
-        local top_sprite = 0
-        local bottom_sprite = 16 + self.movement_ticks / 5 % 4
+      if self.hp <= 0 then
+        clip_absolute(self.x, self.y, 8, abs(16 - self.death_ticks \ 8))
+        self.death_ticks -= 1
 
-        if self.jump_ticks > 0 then
-          top_sprite = 4
-          bottom_sprite = 20
-        end
-
-        spr(top_sprite, self.x, self.y, 1, 1, self.facing != 1)
-        spr(bottom_sprite, self.x, self.y + 8, 1, 1, self.facing != 1)
-      else
-        -- player is dead
-        if self.cloning_vat then
+        if self.death_ticks == 128 then
+          -- respawn player
+          self.cloning_vat:animate()
           self.x = self.cloning_vat.x
           self.y = self.cloning_vat.y - 8
-          self.dx = 0
-          self.dy = 0
+          g_dialog:set({
+            {
+              text = "cloning subject",
+              sprite = 10,
+            },
+          })
+        end
+
+        if self.death_ticks <= 0 and self.cloning_vat then
           self.hp = 6
-          self.cloning_vat:animate()
         end
       end
+
+      local top_sprite = 0
+      local bottom_sprite = 16 + self.movement_ticks / 5 % 4
+
+      if self.jump_ticks > 0 then
+        top_sprite = 4
+        bottom_sprite = 20
+      end
+
+      spr(top_sprite, self.x, self.y, 1, 1, self.facing != 1)
+      spr(bottom_sprite, self.x, self.y + 8, 1, 1, self.facing != 1)
+
+      clip()
+
       if self.hint then
         local y = flr(get_sine_wave(flr(self.y) - 6, 1))
         rectfill(self.x, y + 1, self.x + 6, y + 3, 0)
@@ -246,8 +266,16 @@ function create_player()
     end,  -- player:draw_inventory
 
     take_damage = function(self, damage)
+      if self.hp <= 0 then
+        return
+      end
       self.hp -= damage
       self.dy = -0.5
+      if self.hp <= 0 then
+        self.death_ticks = 256
+        self.dx = 0
+        self.dy = 0
+      end
     end,  -- player:take_damage
   }
 end  -- create_player
@@ -552,7 +580,7 @@ function create_cloning_vat(x, y)
     end,  -- cloning_vat:activate
 
     animate = function(self)
-      self.respawning_ticks = 60
+      self.respawning_ticks = 128
     end,
   }
 end
@@ -640,7 +668,7 @@ function create_door(x, y, size)
 
     draw = function(self)
       palt(0, false)
-      clip(x - flr(g_camera.x), y - flr(g_camera.y), 8, 8 * size)
+      clip_absolute(x, y, 8, 8 * size)
       for i = 0, (size - 1) do
         local sprite = 38
         if i >= 1 then
@@ -687,7 +715,7 @@ function create_fire(x, y)
 
   fire.draw = function(self)
     local sprite = 56 + flr(time() * 10 + x) % 3
-    clip(x - flr(g_camera.x), y - flr(g_camera.y), 8, 8)
+    clip_absolute(x, y, 8, 8)
     spr(sprite, self.x, self.y + 8 - self.hp)
     clip()
   end  -- fire:draw
