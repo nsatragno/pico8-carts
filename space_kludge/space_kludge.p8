@@ -55,8 +55,8 @@ player_collision_points = {
 
 function create_player()
   return {
-    x = 40,
-    y = 50,
+    x = 160,
+    y = 72,
     dx = 0,
     dy = 0.2,
     facing = 1,
@@ -64,7 +64,7 @@ function create_player()
     show_inventory = false,
     equipped_item = nil,
     -- todo find good number
-    hp = 6000,
+    hp = 6,
 
     -- the number of frames you can hold the jump button to go higher
     jump_ticks = 0,
@@ -85,6 +85,16 @@ function create_player()
 
         spr(top_sprite, self.x, self.y, 1, 1, self.facing != 1)
         spr(bottom_sprite, self.x, self.y + 8, 1, 1, self.facing != 1)
+      else
+        -- player is dead
+        if self.cloning_vat then
+          self.x = self.cloning_vat.x
+          self.y = self.cloning_vat.y - 8
+          self.dx = 0
+          self.dy = 0
+          self.hp = 6
+          self.cloning_vat:animate()
+        end
       end
       if self.hint then
         local y = flr(get_sine_wave(flr(self.y) - 6, 1))
@@ -508,6 +518,45 @@ function create_jetpack(x, y)
   }
 end  -- create_jetpack
 
+function create_cloning_vat(x, y)
+  return {
+    x = x,
+    y = y,
+    activatable = true,
+    active = false,
+    respawning_ticks = 0,
+
+    draw = function(self)
+      local sprite = 36
+      if self.respawning_ticks > 0 then
+        self.respawning_ticks -= 1
+        sprite += 1
+      end
+      if not self.active then
+        pal({[3] = 2, [11] = 8})
+      end
+      spr(sprite, x, y - 8, 1, 2)
+      pal()
+    end,  -- cloning_vat:draw,
+
+    activate = function(self)
+      self.active = true
+      self.activatable = false
+      g_dialog:set({
+        {
+          text = "cloning vat activated",
+          sprite = 10,
+        },
+      })
+      g_player.cloning_vat = self
+    end,  -- cloning_vat:activate
+
+    animate = function(self)
+      self.respawning_ticks = 60
+    end,
+  }
+end
+
 function create_enemy(x, y, name, hp)
   return {
     x = x,
@@ -689,15 +738,16 @@ function _init()
     })
   end
 
-  add(g_actors, create_door(80, 48, 2))
-  add(g_actors, create_switch(72, 56, create_tutorial_script({
+  add(g_actors, create_door(192, 72, 2))
+  add(g_actors, create_switch(184, 80, create_tutorial_script({
     {
       text = "jump (⬆️) to make it\nthrough the cargo",
       sprite = 5,
       persistent = true,
     }
   }, g_actors[#g_actors])))
-  add(g_actors, create_switch(88, 56, g_actors[#g_actors - 1]))
+  add(g_actors, create_cloning_vat(176, 80))
+
   add(g_actors, create_door(512, 40, 3))
   add(g_actors, create_switch(504, 56, create_tutorial_script({
     {
@@ -716,11 +766,9 @@ function _init()
   add(g_actors, create_extinguisher(50, 56))
   add(g_actors, create_jetpack(60, 56))
 
-  add(g_actors, create_fire(120, 64))
-  add(g_actors, create_fire(128, 64))
-  add(g_actors, create_fire(136, 64))
+  add(g_actors, create_fire(200, 80))
 
-  add(g_actors, create_denuvo(120, 0, 0, 0.2))
+  -- add(g_actors, create_denuvo(150, 0, 0, 0.2))
 
   g_map = {
     draw = function(self)
