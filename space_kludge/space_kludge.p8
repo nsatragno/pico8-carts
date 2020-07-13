@@ -405,13 +405,13 @@ function create_dialog(messages)
     messages = messages,
 
     set = function(self, messages)
-      self.messages = messages
       self.ticks = 0
+      self.messages = messages
     end,  -- dialog:set
 
     update = function(self)
       if #self.messages <= 0 then
-        return true
+        return
       end
       self.ticks += 1
       self.current_message = sub(self.messages[1].text, 0, self.ticks / 5)
