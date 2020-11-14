@@ -2,16 +2,28 @@ pico-8 cartridge // http://www.pico-8.com
 version 29
 __lua__
 function _init()
+ state = "menu"
  i = 0
  player = {
   x = 64,
   y = 100,
+  cd = 5,
  }
  stars = {}
+ bullets = {}
 end
 
 function _update60()
- i = (time() * 5) % 4
+ if state == "menu" then
+  if btnp(❎) or btnp(🅾️ ) then
+   state = "game"
+   return
+  end
+  return
+ end
+
+ -- game state
+ player.sprite = (time() * 5) % 4
  if btn(⬅️) then
   player.x -= 1
  end
@@ -24,8 +36,16 @@ function _update60()
  if btn(⬆️) then
   player.y -= 1
  end
+ if player.cd <= 0 and btn(🅾️ ) then
+  player.cd = 5
+  add(bullets, {
+   x = player.x,
+   y = player.y - 1
+  })
+ end
  player.x = mid(0, player.x, 127)
  player.y = mid(0, player.y, 127)
+ player.cd = max(0, player.cd - 1)
 
  if flr(rnd() * 20) == 0 then
    add(stars, {
@@ -37,6 +57,16 @@ function _update60()
 
  for star in all(stars) do
    star.y += 1
+   if star.y > 128 then
+    del(stars, star)
+   end
+ end
+
+ for bullet in all(bullets) do
+  bullet.y -= 3
+  if bullet.y < 0 then
+   del(bullets, bullet)
+  end
  end
 end
 
@@ -47,7 +77,18 @@ function _draw()
    pset(star.x, star.y, star.colour)
  end
 
- spr(i, player.x - 3, player.y - 8, 1, 2)
+ for bullet in all(bullets) do
+   pset(bullet.x, bullet.y, 2)
+ end
+
+ if state == "menu" then
+  print(" super kat 8 ", 40, 40, 7)
+  print("press ❎ | 🅾️ ", 40, 60, 7)
+  return
+ end
+
+ -- game
+ spr(player.sprite, player.x - 3, player.y - 8, 1, 2)
 
  rectfill(player.x - 1, player.y - 1, player.x + 1, player.y + 1, 3)
 end
