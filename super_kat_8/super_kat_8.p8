@@ -10,13 +10,46 @@ function _init()
   cd = 5,
  }
  stars = {}
+ shots = {}
  bullets = {}
- brushes = {{
-  x = rnd(100) + 10,
-  y = -10,
-  hp = 8,
-  dmg = false,
- }}
+ brushes = {}
+
+ events = {
+  {
+   x = 10,
+   y = 0,
+   spawn = "brush",
+   offset = 2,
+  },
+  {
+   x = 117,
+   y = 0,
+   spawn = "brush",
+   offset = 3,
+  }
+ }
+end
+
+function normalize(x, y)
+ length = sqrt(x * x + y * y)
+ return {
+  x = x / length,
+  y = y / length,
+ }
+end
+
+function collides(bullet, x0, x1, y0, y1)
+ return bullet.x >= x0 and bullet.x <= x1 and bullet.y >= y0 and bullet.y <= y1
+end
+
+function shoot(from, to, speed)
+ d = normalize(to.x - from.x, to.y - from.y)
+ add(bullets, {
+  x = from.x,
+  y = from.y,
+  dx = d.x * speed,
+  dy = d.y * speed,
+ })
 end
 
 function _update60()
@@ -30,7 +63,7 @@ function _update60()
  end
 
  -- game state
- timer = time() - start_time
+ offset = time() - start_time
  player.sprite = (time() * 5) % 4
  if btn(⬅️) then
   player.x -= 1
@@ -46,7 +79,7 @@ function _update60()
  end
  if player.cd <= 0 and btn(🅾️ ) then
   player.cd = 10
-  add(bullets, {
+  add(shots, {
    x = player.x,
    y = player.y - 1
   })
@@ -63,6 +96,23 @@ function _update60()
    })
  end
 
+ event = events[1]
+ while event and event.offset <= offset do
+  del(events, event)
+  if event.spawn == "brush" then
+   add(brushes, {
+    x = event.x,
+    y = event.y,
+    hp = 8,
+    dmg = false,
+    cd = rnd(30) + 120,
+   })
+  end
+  offset = 0
+  start_time = time()
+  event = events[1]
+ end
+
  for star in all(stars) do
    star.y += 1
    if star.y > 128 then
@@ -76,10 +126,14 @@ function _update60()
   if brush.y > 160 then
    del(brushes, brush)
   end
-  for bullet in all(bullets) do
-   if bullet.x >= brush.x - 2 and bullet.x <= brush.x + 1 and
-      bullet.y >= brush.y - 3 and bullet.y <= brush.y + 4 then
-    del(bullets, bullet)
+  brush.cd -= 1
+  if brush.cd <= 0 then
+   brush.cd = 120
+   shoot(brush, player, 1)
+  end
+  for shot in all(shots) do
+   if collides(shot, brush.x - 2, brush.x + 1, brush.y - 3, brush.y + 4) then
+    del(shots, shot)
     brush.dmg = true
     brush.hp -= 1
     if brush.hp <= 0 then
@@ -89,10 +143,22 @@ function _update60()
   end
  end
 
+ for shot in all(shots) do
+  shot.y -= 3
+  if shot.y < 0 then
+   del(shots, shot)
+  end
+ end
+
  for bullet in all(bullets) do
-  bullet.y -= 3
-  if bullet.y < 0 then
+  bullet.x += bullet.dx
+  bullet.y += bullet.dy
+  if not collides(bullet, 0, 128, 0, 128) then
    del(bullets, bullet)
+  end
+  if collides(bullet, player.x - 1, player.x + 1, player.y - 1, player.y + 1) then
+   -- player takes damage
+    stop()
   end
  end
 end
@@ -111,8 +177,8 @@ function _draw()
    pset(star.x, star.y, star.colour)
  end
 
- for bullet in all(bullets) do
-   pset(bullet.x, bullet.y, 2)
+ for shot in all(shots) do
+   pset(shot.x, shot.y, 2)
  end
 
  for brush in all(brushes) do
@@ -124,9 +190,16 @@ function _draw()
   --rectfill(brush.x - 2, brush.y - 3, brush.x + 1, brush.y + 4, 3)
  end
 
+ for bullet in all(bullets) do
+  pset(bullet.x, bullet.y, 14 + flr(time() * 8) % 2)
+ end
+
  spr(player.sprite, player.x - 3, player.y - 8, 1, 2)
 
  rectfill(player.x - 1, player.y - 1, player.x + 1, player.y + 1, 3)
+
+ -- hud
+ print(offset)
 end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
