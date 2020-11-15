@@ -111,7 +111,7 @@ function _update60()
    add(stars, {
      x = rnd(127),
      y = 0,
-     colour = flr(5 + rnd(3)),
+     colour = 5,
    })
  end
 
