@@ -46,6 +46,19 @@ function collides(bullet, x0, x1, y0, y1)
  return bullet.x >= x0 and bullet.x <= x1 and bullet.y >= y0 and bullet.y <= y1
 end
 
+function explode(target)
+ for i = 0, 8 do
+  add(particles, {
+   x = target.x,
+   y = target.y,
+   life = 30,
+   dx = cos(i / 8),
+   dy = sin(i / 8),
+   colour = 2,
+  })
+ end
+end
+
 function shoot(from, to, speed)
  d = normalize(to.x - from.x, to.y - from.y)
  add(bullets, {
@@ -109,7 +122,7 @@ function _update60()
    add(brushes, {
     x = event.x,
     y = event.y,
-    hp = 8,
+    hp = 5,
     dmg = false,
     cd = rnd(30) + 120,
    })
@@ -143,6 +156,7 @@ function _update60()
     brush.dmg = true
     brush.hp -= 1
     if brush.hp <= 0 then
+     explode(brush)
      del(brushes, brush)
     end
    end
@@ -208,8 +222,8 @@ function _draw()
  cls()
 
  if state == "menu" then
-  print(" super kat 8 ", 40, 40, 7)
-  print("press ❎ | 🅾️ ", 40, 60, 7)
+  print(" super kat 8 ", 36, 40, 7)
+  print("press ❎ | 🅾️ ", 36, 60, 7)
   return
  end
 
