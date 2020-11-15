@@ -8,6 +8,8 @@ function _init()
   x = 64,
   y = 100,
   cd = 5,
+  state = "alive",
+  lives = 3,
  }
  stars = {}
  shots = {}
@@ -28,6 +30,8 @@ function _init()
    offset = 3,
   }
  }
+
+ particles = {}
 end
 
 function normalize(x, y)
@@ -64,29 +68,31 @@ function _update60()
 
  -- game state
  offset = time() - start_time
- player.sprite = (time() * 5) % 4
- if btn(⬅️) then
-  player.x -= 1
+ if player.state == "alive" then
+  player.sprite = (time() * 5) % 4
+  if btn(⬅️) then
+   player.x -= 1
+  end
+  if btn(➡️) then
+   player.x += 1
+  end
+  if btn(⬇️) then
+   player.y += 1
+  end
+  if btn(⬆️) then
+   player.y -= 1
+  end
+  if player.cd <= 0 and btn(🅾️ ) then
+   player.cd = 10
+   add(shots, {
+    x = player.x,
+    y = player.y - 1
+   })
+  end
+  player.x = mid(0, player.x, 127)
+  player.y = mid(0, player.y, 127)
+  player.cd = max(0, player.cd - 1)
  end
- if btn(➡️) then
-  player.x += 1
- end
- if btn(⬇️) then
-  player.y += 1
- end
- if btn(⬆️) then
-  player.y -= 1
- end
- if player.cd <= 0 and btn(🅾️ ) then
-  player.cd = 10
-  add(shots, {
-   x = player.x,
-   y = player.y - 1
-  })
- end
- player.x = mid(0, player.x, 127)
- player.y = mid(0, player.y, 127)
- player.cd = max(0, player.cd - 1)
 
  if flr(rnd() * 20) == 0 then
    add(stars, {
@@ -156,9 +162,44 @@ function _update60()
   if not collides(bullet, 0, 128, 0, 128) then
    del(bullets, bullet)
   end
-  if collides(bullet, player.x - 1, player.x + 1, player.y - 1, player.y + 1) then
-   -- player takes damage
-    stop()
+  if player.state == "alive" and
+     collides(bullet, player.x - 1, player.x + 1, player.y - 1, player.y + 1) then
+   del(bullets, bullet)
+   player.state = "dead"
+   player.lives -= 1
+   for s = 0.25, 1, 0.25 do
+    for i = 1, 32 do
+     local colour
+     if i < 6 then
+      colour = 4
+     elseif i < 11 then
+      colour = 8
+     elseif i < 20 then
+      colour = 4
+     elseif i < 30 then
+      colour = 1
+     else
+      colour = 4
+     end
+     add(particles, {
+      x = player.x,
+      y = player.y,
+      life = 200,
+      dx = cos(i / 32) * s,
+      dy = sin(i / 32) * s,
+      colour = colour,
+     })
+    end
+   end
+  end
+ end
+
+ for particle in all(particles) do
+  particle.x += particle.dx
+  particle.y += particle.dy
+  particle.life -= 1
+  if particle.life <= 0 then
+   del(particles, particle)
   end
  end
 end
@@ -174,11 +215,12 @@ function _draw()
 
  -- game
  for star in all(stars) do
-   pset(star.x, star.y, star.colour)
+  pset(star.x, star.y, star.colour)
  end
 
- for shot in all(shots) do
-   pset(shot.x, shot.y, 2)
+ for particle in all(particles) do
+  -- todo make stars particles
+  pset(particle.x, particle.y, particle.colour)
  end
 
  for brush in all(brushes) do
@@ -190,16 +232,20 @@ function _draw()
   --rectfill(brush.x - 2, brush.y - 3, brush.x + 1, brush.y + 4, 3)
  end
 
+ for shot in all(shots) do
+   pset(shot.x, shot.y, 2)
+ end
+
  for bullet in all(bullets) do
   pset(bullet.x, bullet.y, 14 + flr(time() * 8) % 2)
  end
 
- spr(player.sprite, player.x - 3, player.y - 8, 1, 2)
-
- rectfill(player.x - 1, player.y - 1, player.x + 1, player.y + 1, 3)
+ if player.state == "alive" then
+  spr(player.sprite, player.x - 3, player.y - 8, 1, 2)
+  rectfill(player.x - 1, player.y - 1, player.x + 1, player.y + 1, 3)
+ end
 
  -- hud
- print(offset)
 end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
