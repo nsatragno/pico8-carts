@@ -13,9 +13,10 @@ function _init()
  player.rect = {
   x0 = player.x - 1,
   x1 = player.x + 1,
-  y0 = player.y - 1,
-  y1 = player.y + 1,
+  y0 = player.y - 2,
+  y1 = player.y,
  }
+ calculate_player_rect()
  stars = {}
  shots = {}
  bullets = {}
@@ -23,16 +24,22 @@ function _init()
 
  events = {
   {
-   x = 10,
-   y = 0,
+   x = 20,
+   y = -10,
    spawn = "brush",
    offset = 2,
   },
   {
-   x = 117,
-   y = 0,
+   x = 107,
+   y = -10,
    spawn = "brush",
    offset = 3,
+  },
+  {
+   x = 60,
+   y = -10,
+   spawn = "brush",
+   offset = 5,
   }
  }
 
@@ -116,6 +123,15 @@ function shoot(from, to, speed)
  })
 end
 
+function calculate_player_rect()
+ player.rect = {
+  x0 = player.x - 1,
+  x1 = player.x + 1,
+  y0 = player.y - 2,
+  y1 = player.y + 0,
+ }
+end
+
 function _update60()
  if state == "menu" then
   if btnp(❎) or btnp(🅾️ ) then
@@ -166,12 +182,7 @@ function _update60()
   player.y = mid(0, player.y, 127)
   player.cd = max(0, player.cd - 1)
  end
- player.rect = {
-  x0 = player.x - 1,
-  x1 = player.x + 1,
-  y0 = player.y - 1,
-  y1 = player.y + 1,
- }
+ calculate_player_rect()
  if flr(rnd() * 20) == 0 then
    add(stars, {
      x = rnd(127),
