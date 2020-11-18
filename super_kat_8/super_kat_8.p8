@@ -9,7 +9,6 @@ function _init()
   y = 100,
   cd = 5,
   state = "alive",
-  lives = 3,
  }
  player.rect = {
   x0 = player.x - 1,
@@ -67,7 +66,7 @@ function kill_player()
   return
  end
  player.state = "dead"
- player.lives -= 1
+ player.respawn_cd = 200
  for s = 0.25, 1, 0.25 do
   for i = 1, 32 do
    local colour
@@ -129,7 +128,20 @@ function _update60()
 
  -- game state
  offset = time() - start_time
- if player.state == "alive" then
+ if player.state == "dead" then
+  player.respawn_cd -= 1
+  if player.respawn_cd <= 0 then
+   player.state = "invulnerable"
+   player.invulnerable_cd = 120
+  end
+ end
+ if player.state == "invulnerable" then
+  player.invulnerable_cd -= 1
+  if player.invulnerable_cd <= 0 then
+   player.state = "alive"
+  end
+ end
+ if player.state != "dead" then
   player.sprite = (time() * 5) % 4
   if btn(⬅️) then
    player.x -= 1
@@ -301,7 +313,8 @@ function _draw()
   pset(bullet.x, bullet.y, 14 + flr(time() * 8) % 2)
  end
 
- if player.state == "alive" then
+ if player.state == "alive" or
+    (player.state == "invulnerable" and flr(time() * 8) % 2 == 0) then
   spr(player.sprite, player.x - 3, player.y - 8, 1, 2)
   rectfill(player.rect.x0, player.rect.y0, player.rect.x1, player.rect.y1, 3)
  end
