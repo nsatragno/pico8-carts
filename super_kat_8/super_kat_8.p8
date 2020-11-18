@@ -11,6 +11,12 @@ function _init()
   state = "alive",
   lives = 3,
  }
+ player.rect = {
+  x0 = player.x - 1,
+  x1 = player.x + 1,
+  y0 = player.y - 1,
+  y1 = player.y + 1,
+ }
  stars = {}
  shots = {}
  bullets = {}
@@ -42,8 +48,50 @@ function normalize(x, y)
  }
 end
 
-function collides(bullet, x0, x1, y0, y1)
- return bullet.x >= x0 and bullet.x <= x1 and bullet.y >= y0 and bullet.y <= y1
+function collides(bullet, rect)
+ return bullet.x >= rect.x0 and
+        bullet.x <= rect.x1 and
+        bullet.y >= rect.y0 and
+        bullet.y <= rect.y1
+end
+
+function collides_rect(r1, r2)
+ return r1.x0 <= r2.x1 and
+        r1.x1 >= r2.x0 and
+        r1.y0 <= r2.y1 and
+        r1.y1 >= r2.y0
+end
+
+function kill_player()
+ if player.state != "alive" then
+  return
+ end
+ player.state = "dead"
+ player.lives -= 1
+ for s = 0.25, 1, 0.25 do
+  for i = 1, 32 do
+   local colour
+   if i < 6 then
+    colour = 4
+   elseif i < 11 then
+    colour = 8
+   elseif i < 20 then
+    colour = 4
+   elseif i < 30 then
+    colour = 1
+   else
+    colour = 4
+   end
+   add(particles, {
+    x = player.x,
+    y = player.y,
+    life = 200,
+    dx = cos(i / 32) * s,
+    dy = sin(i / 32) * s,
+    colour = colour,
+   })
+  end
+ end
 end
 
 function explode(target)
@@ -106,7 +154,12 @@ function _update60()
   player.y = mid(0, player.y, 127)
   player.cd = max(0, player.cd - 1)
  end
-
+ player.rect = {
+  x0 = player.x - 1,
+  x1 = player.x + 1,
+  y0 = player.y - 1,
+  y1 = player.y + 1,
+ }
  if flr(rnd() * 20) == 0 then
    add(stars, {
      x = rnd(127),
@@ -140,6 +193,15 @@ function _update60()
  end
 
  for brush in all(brushes) do
+  local brush_rect = {
+   x0 = brush.x - 2,
+   x1 = brush.x + 1,
+   y0 = brush.y - 3,
+   y1 = brush.y + 4,
+  }
+  if collides_rect(player.rect, brush_rect) then
+   kill_player()
+  end
   if brush.cd % 5 == 0 then
    add(particles, {
     x = brush.x,
@@ -161,7 +223,7 @@ function _update60()
    shoot(brush, player, 1)
   end
   for shot in all(shots) do
-   if collides(shot, brush.x - 2, brush.x + 1, brush.y - 3, brush.y + 4) then
+   if collides(shot, brush_rect) then
     del(shots, shot)
     brush.dmg = true
     brush.hp -= 1
@@ -183,38 +245,13 @@ function _update60()
  for bullet in all(bullets) do
   bullet.x += bullet.dx
   bullet.y += bullet.dy
-  if not collides(bullet, 0, 128, 0, 128) then
+  if not collides(bullet, { x0 = 0, x1 = 128, y0 = 0, y1 = 128 }) then
    del(bullets, bullet)
   end
   if player.state == "alive" and
-     collides(bullet, player.x - 1, player.x + 1, player.y - 1, player.y + 1) then
+     collides(bullet, player.rect) then
    del(bullets, bullet)
-   player.state = "dead"
-   player.lives -= 1
-   for s = 0.25, 1, 0.25 do
-    for i = 1, 32 do
-     local colour
-     if i < 6 then
-      colour = 4
-     elseif i < 11 then
-      colour = 8
-     elseif i < 20 then
-      colour = 4
-     elseif i < 30 then
-      colour = 1
-     else
-      colour = 4
-     end
-     add(particles, {
-      x = player.x,
-      y = player.y,
-      life = 200,
-      dx = cos(i / 32) * s,
-      dy = sin(i / 32) * s,
-      colour = colour,
-     })
-    end
-   end
+   kill_player()
   end
  end
 
@@ -266,7 +303,7 @@ function _draw()
 
  if player.state == "alive" then
   spr(player.sprite, player.x - 3, player.y - 8, 1, 2)
-  rectfill(player.x - 1, player.y - 1, player.x + 1, player.y + 1, 3)
+  rectfill(player.rect.x0, player.rect.y0, player.rect.x1, player.rect.y1, 3)
  end
 
  -- hud
