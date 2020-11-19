@@ -5,16 +5,16 @@ function _init()
  state = "menu"
  i = 0
  player = {
-  x = 64,
+  x = 64 - 10,
   y = 100,
   cd = 5,
   state = "alive",
  }
- player.rect = {
-  x0 = player.x - 1,
-  x1 = player.x + 1,
-  y0 = player.y - 2,
-  y1 = player.y,
+ nina = {
+  x = 64 + 10,
+  y = 100,
+  state = "show",
+  sprite = 32,
  }
  calculate_player_rect()
  stars = {}
@@ -45,6 +45,40 @@ function _init()
 
  particles = {}
 end
+
+function create_dialog(messages)
+  return {
+    ticks = 0,
+    messages = messages,
+
+    set = function(self, messages)
+      self.ticks = 0
+      self.messages = messages
+    end,  -- dialog:set
+
+    update = function(self)
+      if #self.messages <= 0 then
+        return
+      end
+      self.ticks += 1
+      self.current_message = sub(self.messages[1].text, 0, self.ticks / 5)
+      if self.ticks / 5 > #self.messages[1].text + 30
+         and not self.messages[1].persistent then
+        self.ticks = 0
+        deli(self.messages, 1)
+      end
+    end,  -- dialog:update
+
+    draw = function(self)
+      if #self.messages <= 0 then
+        return
+      end
+      rectfill(0, 120, 127, 127, 1)
+      print(self.current_message, 18, 122, 7)
+      spr(self.messages[1].sprite, 0, 120, 1, 1)
+    end,  -- dialog:draw
+  }
+end  -- create_dialog
 
 function normalize(x, y)
  length = sqrt(x * x + y * y)
@@ -136,11 +170,109 @@ function _update60()
  if state == "menu" then
   if btnp(❎) or btnp(🅾️ ) then
    start_time = time()
-   state = "game"
+   state = "intro"
+   dialog = create_dialog({
+    {
+     text = "come hang out this weekend",
+     sprite = 32,
+    },
+    {
+     text = "i'm busy with art, sorry",
+     sprite = 0,
+    },
+    {
+     text = "just ignore it",
+     sprite = 32,
+    },
+    {
+     text = "what could go wrong?",
+     sprite = 32,
+    },
+    {
+     text = "don't be irresponsible",
+     sprite = 0,
+    },
+    {
+     text = "there's a lot at stake",
+     sprite = 0,
+    },
+    {
+     text = "?",
+     sprite = 32,
+    },
+    {
+     text = "bad things will happen",
+     sprite = 0,
+    },
+    {
+     text = "like what?",
+     sprite = 32,
+    },
+    {
+     text = "well anything",
+     sprite = 0,
+    },
+    {
+     text = "we are in a game after all",
+     sprite = 0,
+    },
+    {
+     text = "and i can't skip this intro",
+     sprite = 0,
+    },
+    {
+     text = "i made it unskippable",
+     sprite = 32,
+    },
+    {
+     text = "because i know you <3",
+     sprite = 32,
+    },
+    {
+     text = ">:(",
+     sprite = 0,
+    },
+    {
+     text = "anyway what's that?",
+     sprite = 0,
+    },
+    {
+     text = "your drawing tablet",
+     sprite = 32,
+    },
+    {
+     text = "sorry i can't draw",
+     sprite = 32,
+    },
+    {
+     text = "help!!!",
+     sprite = 32,
+    },
+    {
+     text = "i'm coming!",
+     sprite = 0,
+    },
+    {
+     text = "hahaha she said i'm coming",
+     sprite = 68,
+    },
+    {
+     text = "you'll never catch me!",
+     sprite = 68,
+    },
+   })
    return
   end
   return
  end
+ if state == "intro" then
+  dialog:update()
+  if #dialog.messages == 0 then
+   state = "game"
+  end
+  return
+ end
+
 
  -- game state
  offset = time() - start_time
@@ -327,10 +459,15 @@ function _draw()
  if player.state == "alive" or
     (player.state == "invulnerable" and flr(time() * 8) % 2 == 0) then
   spr(player.sprite, player.x - 3, player.y - 8, 1, 2)
-  rectfill(player.rect.x0, player.rect.y0, player.rect.x1, player.rect.y1, 3)
+  --rectfill(player.rect.x0, player.rect.y0, player.rect.x1, player.rect.y1, 3)
+ end
+
+ if nina.state == "show" then
+  spr(nina.sprite, nina.x - 3, nina.y - 7, 1, 2)
  end
 
  -- hud
+ dialog:draw()
 end
 __gfx__
 00888000008880000088800000888000000888000088800000000000000000000000000000000000000000000000000000000000000000000000000000000000
