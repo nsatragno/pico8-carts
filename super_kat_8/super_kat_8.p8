@@ -15,6 +15,8 @@ function _init()
   y = 100,
   state = "show",
   sprite = 32,
+  dx = 0,
+  dy = 0,
  }
  calculate_player_rect()
  stars = {}
@@ -172,62 +174,62 @@ function _update60()
    start_time = time()
    state = "intro"
    dialog = create_dialog({
-    {
-     text = "come hang out this weekend",
-     sprite = 32,
-    },
-    {
-     text = "i'm busy with art, sorry",
-     sprite = 0,
-    },
-    {
-     text = "just ignore it",
-     sprite = 32,
-    },
-    {
-     text = "what could go wrong?",
-     sprite = 32,
-    },
-    {
-     text = "don't be irresponsible",
-     sprite = 0,
-    },
-    {
-     text = "there's a lot at stake",
-     sprite = 0,
-    },
-    {
-     text = "?",
-     sprite = 32,
-    },
-    {
-     text = "bad things will happen",
-     sprite = 0,
-    },
-    {
-     text = "like what?",
-     sprite = 32,
-    },
-    {
-     text = "well anything",
-     sprite = 0,
-    },
-    {
-     text = "we are in a game after all",
-     sprite = 0,
-    },
-    {
-     text = "and i can't skip this intro",
-     sprite = 0,
-    },
-    {
-     text = "i made it unskippable",
-     sprite = 32,
-    },
-    {
-     text = "because i know you <3",
-     sprite = 32,
-    },
+--  {
+--   text = "come hang out this weekend",
+--   sprite = 32,
+--  },
+--  {
+--   text = "i'm busy with art, sorry",
+--   sprite = 0,
+--  },
+--  {
+--   text = "just ignore it",
+--   sprite = 32,
+--  },
+--  {
+--   text = "what could go wrong?",
+--   sprite = 32,
+--  },
+--  {
+--   text = "don't be irresponsible",
+--   sprite = 0,
+--  },
+--  {
+--   text = "there's a lot at stake",
+--   sprite = 0,
+--  },
+--  {
+--   text = "?",
+--   sprite = 32,
+--  },
+--  {
+--   text = "bad things will happen",
+--   sprite = 0,
+--  },
+--  {
+--   text = "like what?",
+--   sprite = 32,
+--  },
+--  {
+--   text = "well anything",
+--   sprite = 0,
+--  },
+--  {
+--   text = "we are in a game after all",
+--   sprite = 0,
+--  },
+--  {
+--   text = "and i can't skip this intro",
+--   sprite = 0,
+--  },
+--  {
+--   text = "i made it unskippable",
+--   sprite = 32,
+--  },
+--  {
+--   text = "because i know you <3",
+--   sprite = 32,
+--  },
     {
      text = ">:(",
      sprite = 0,
@@ -235,18 +237,20 @@ function _update60()
     {
      text = "anyway what's that?",
      sprite = 0,
+     action = "spawn_tablet",
     },
     {
      text = "your drawing tablet",
      sprite = 32,
     },
     {
-     text = "sorry i can't draw",
+     text = "sorry i can't draw for shit",
      sprite = 32,
     },
     {
      text = "help!!!",
      sprite = 32,
+     action = "capture_nina",
     },
     {
      text = "i'm coming!",
@@ -269,6 +273,47 @@ function _update60()
   dialog:update()
   if #dialog.messages == 0 then
    state = "game"
+   return
+  end
+
+  nina.x += nina.dx
+  nina.y += nina.dy
+
+  if tablet then
+    tablet.x += tablet.dx
+    tablet.y += tablet.dy
+    tablet.pencil.x += tablet.pencil.dx
+    tablet.pencil.y += tablet.pencil.dy
+    if abs(tablet.pencil.x - nina.x) <= 2 and abs(tablet.pencil.y + 15 - nina.y) <= 2 then
+      tablet.pencil.dy = -0.5
+      tablet.pencil.dx = 0
+      tablet.dy = -0.5
+      tablet.dx = 0
+      nina.dy = -0.5
+    end
+  end
+  if dialog.messages[1].action == "capture_nina" then
+    dialog.messages[1].action = nil
+    tablet.dx = 0
+    tablet.dy = 0
+    local d = normalize(nina.x - tablet.pencil.x, nina.y - tablet.pencil.y + 15)
+    tablet.pencil.dx = d.x * 0.7
+    tablet.pencil.dy = d.y * 0.7
+  end
+  if dialog.messages[1].action == "spawn_tablet" then
+    dialog.messages[1].action = nil
+    tablet = {
+      x = 56,
+      y = -16,
+      dx = 0,
+      dy = 0.1,
+      pencil = {
+        x = 76,
+        y = -16,
+        dx = 0,
+        dy = 0.1,
+      },
+    }
   end
   return
  end
@@ -454,6 +499,12 @@ function _draw()
 
  for bullet in all(bullets) do
   pset(bullet.x, bullet.y, 14 + flr(time() * 8) % 2)
+ end
+
+ if tablet then
+   spr(68, tablet.x, tablet.y, 2, 2)
+   spr(70, tablet.pencil.x, tablet.pencil.y, 1, 2)
+   line(tablet.x + 15, tablet.y, tablet.pencil.x, tablet.pencil.y, 7)
  end
 
  if player.state == "alive" or
