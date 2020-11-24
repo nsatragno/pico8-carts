@@ -174,62 +174,42 @@ function _update60()
    start_time = time()
    state = "intro"
    dialog = create_dialog({
---  {
---   text = "come hang out this weekend",
---   sprite = 32,
---  },
---  {
---   text = "i'm busy with art, sorry",
---   sprite = 0,
---  },
---  {
---   text = "just ignore it",
---   sprite = 32,
---  },
---  {
---   text = "what could go wrong?",
---   sprite = 32,
---  },
---  {
---   text = "don't be irresponsible",
---   sprite = 0,
---  },
---  {
---   text = "there's a lot at stake",
---   sprite = 0,
---  },
---  {
---   text = "?",
---   sprite = 32,
---  },
---  {
---   text = "bad things will happen",
---   sprite = 0,
---  },
---  {
---   text = "like what?",
---   sprite = 32,
---  },
---  {
---   text = "well anything",
---   sprite = 0,
---  },
---  {
---   text = "we are in a game after all",
---   sprite = 0,
---  },
---  {
---   text = "and i can't skip this intro",
---   sprite = 0,
---  },
---  {
---   text = "i made it unskippable",
---   sprite = 32,
---  },
---  {
---   text = "because i know you <3",
---   sprite = 32,
---  },
+    {
+     text = "hello kat!",
+     sprite = 32,
+    },
+    {
+     text = "hey nina!",
+     sprite = 0,
+    },
+    {
+     text = "notice something strange?",
+     sprite = 32,
+    },
+    {
+     text = "you look pixelated",
+     sprite = 0,
+    },
+    {
+     text = "huh",
+     sprite = 32,
+    },
+    {
+     text = "i think we're in a game",
+     sprite = 32,
+    },
+    {
+     text = "and i think i made it",
+     sprite = 32,
+    },
+    {
+     text = "how do you know?",
+     sprite = 0,
+    },
+    {
+     text = "you can't skip the intro",
+     sprite = 32,
+    },
     {
      text = ">:(",
      sprite = 0,
@@ -258,10 +238,6 @@ function _update60()
     },
     {
      text = "hahaha she said i'm coming",
-     sprite = 68,
-    },
-    {
-     text = "you'll never catch me!",
      sprite = 68,
     },
    })
