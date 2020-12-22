@@ -23,8 +23,71 @@ function _init()
  shots = {}
  bullets = {}
  brushes = {}
+ pencils = {}
 
  events = {
+  {
+   x = 20,
+   y = -5,
+   spawn = "pencil",
+   offset = 2,
+   angle = .75,
+  },
+  {
+   x = 30,
+   y = -5,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 40,
+   y = -5,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 50,
+   y = -5,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 107,
+   y = -5,
+   spawn = "pencil",
+   offset = 1,
+   angle = .75,
+  },
+  {
+   x = 97,
+   y = -5,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 87,
+   y = -5,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 77,
+   y = -5,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 20,
+   y = -10,
+   spawn = "brush",
+   offset = 20,
+  },
   {
    x = 20,
    y = -10,
@@ -247,8 +310,11 @@ function _update60()
  end
  if state == "intro" then
   dialog:update()
-  if #dialog.messages == 0 then
+  -- todo comment out btnp to disallow skipping intro
+  if #dialog.messages == 0 or btnp(❎) or btnp(🅾️ ) then
    state = "game"
+   dialog.messages = {}
+   nina.state = "hide"
    return
   end
 
@@ -355,6 +421,14 @@ function _update60()
     dmg = false,
     cd = flr(rnd(30)) + 120,
    })
+  elseif event.spawn == "pencil" then
+   add(pencils, {
+    x = event.x,
+    y = event.y,
+    angle = event.angle,
+    hp = 1,
+    speed = 0,
+   })
   end
   offset = 0
   start_time = time()
@@ -406,6 +480,34 @@ function _update60()
     if brush.hp <= 0 then
      explode(brush)
      del(brushes, brush)
+    end
+   end
+  end
+ end
+
+ for pencil in all(pencils) do
+  local pencil_rect = {
+   x0 = pencil.x,
+   x1 = pencil.x + 1,
+   y0 = pencil.y - 4,
+   y1 = pencil.y + 3,
+  }
+  if collides_rect(player.rect, pencil_rect) then
+   kill_player()
+  end
+  pencil.speed = min(pencil.speed + 0.01, 1.75)
+  pencil.x += cos(pencil.angle) * pencil.speed
+  pencil.y += sin(pencil.angle) * pencil.speed
+  if pencil.y > 160 then
+   del(pencils, pencil)
+  end
+  for shot in all(shots) do
+   if collides(shot, pencil_rect) then
+    del(shots, shot)
+    pencil.hp -= 1
+    if pencil.hp <= 0 then
+     explode(pencil)
+     del(pencils, pencil)
     end
    end
   end
@@ -467,6 +569,19 @@ function _draw()
   spr(64 + flr(time() * 3) % 4, brush.x - 3, brush.y - 8, 1, 2)
   pal()
   --rectfill(brush.x - 2, brush.y - 3, brush.x + 1, brush.y + 4, 3)
+ end
+
+ for pencil in all(pencils) do
+  spr(96, pencil.x - 3, pencil.y - 4, 1, 2, flr(time() * 5) % 2 == 0)
+  pal()
+
+  local pencil_rect = {
+   x0 = pencil.x,
+   x1 = pencil.x + 1,
+   y0 = pencil.y - 3,
+   y1 = pencil.y + 4,
+  }
+  --rectfill(pencil.x, pencil.y - 4, pencil.x + 1, pencil.y + 3, 3)
  end
 
  for shot in all(shots) do
@@ -545,3 +660,11 @@ eeeeeee0000000000000000000000000000000000000000000000000000000000000000000000000
 04444000044440000444400004444000d56666666666666555000000055000000000000000000000000000000000000000000000000000000000000000000000
 00440000004400000044000000440000556666666666666555000000550000000000000000000000000000000000000000000000000000000000000000000000
 00440000004400000044000000440000555555555555555560000000600000000000000000000000000000000000000000000000000000000000000000000000
+00088000000000880000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000a400000000a400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000a40000000a4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000a4000000a40000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000a400000a400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000a40000a4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00055000550000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00050000500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
