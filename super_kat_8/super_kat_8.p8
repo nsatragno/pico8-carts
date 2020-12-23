@@ -27,10 +27,31 @@ function _init()
 
  events = {
   {
+   x = -5,
+   y = 0,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .86,
+  },
+  {
+   x = -5,
+   y = 10,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .86,
+  },
+  {
+   x = -5,
+   y = 20,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .86,
+  },
+  {
    x = 20,
    y = -5,
    spawn = "pencil",
-   offset = 2,
+   offset = 0.2,
    angle = .75,
   },
   {
@@ -58,7 +79,7 @@ function _init()
    x = 107,
    y = -5,
    spawn = "pencil",
-   offset = 1,
+   offset = 0.5,
    angle = .75,
   },
   {
@@ -81,6 +102,27 @@ function _init()
    spawn = "pencil",
    offset = 0.2,
    angle = .75,
+  },
+  {
+   x = 132,
+   y = 0,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .62,
+  },
+  {
+   x = 132,
+   y = 10,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .62,
+  },
+  {
+   x = 132,
+   y = 20,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .62,
   },
   {
    x = 20,
@@ -115,6 +157,7 @@ function create_dialog(messages)
   return {
     ticks = 0,
     messages = messages,
+    current_message = "",
 
     set = function(self, messages)
       self.ticks = 0
@@ -138,9 +181,9 @@ function create_dialog(messages)
       if #self.messages <= 0 then
         return
       end
-      rectfill(0, 120, 127, 127, 1)
-      print(self.current_message, 18, 122, 7)
-      spr(self.messages[1].sprite, 0, 120, 1, 1)
+      rectfill(0, 119, 127, 127, 1)
+      print(self.current_message, 18, 121, 7)
+      spr(self.messages[1].sprite, 0, 119, 1, 1)
     end,  -- dialog:draw
   }
 end  -- create_dialog
@@ -572,7 +615,16 @@ function _draw()
  end
 
  for pencil in all(pencils) do
-  spr(96, pencil.x - 3, pencil.y - 4, 1, 2, flr(time() * 5) % 2 == 0)
+  local sprite
+  local flip_x = false
+  if pencil.angle == 0.75 then
+   sprite = 96
+   flip_x = flr(time() * 5) % 2 == 0
+  else
+   sprite = 97
+   flip_x = pencil.angle > 0.75
+  end
+  spr(sprite, pencil.x - 3, pencil.y - 4, 1, 2, flip_x)
   pal()
 
   local pencil_rect = {
