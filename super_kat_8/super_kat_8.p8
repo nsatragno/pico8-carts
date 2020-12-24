@@ -27,10 +27,16 @@ function _init()
 
  events = {
   {
+   x = 50,
+   y = -30,
+   spawn = "tablet",
+   offset = 1,
+  },
+  {
    x = -5,
    y = 0,
    spawn = "pencil",
-   offset = 0.2,
+   offset = 300,
    angle = .86,
   },
   {
@@ -154,38 +160,39 @@ function _init()
 end
 
 function create_dialog(messages)
-  return {
-    ticks = 0,
-    messages = messages,
-    current_message = "",
+ return {
+  ticks = 0,
+  messages = messages,
+  current_message = "",
 
-    set = function(self, messages)
-      self.ticks = 0
-      self.messages = messages
-    end,  -- dialog:set
+  set = function(self, messages)
+   self.ticks = 0
+   self.messages = messages
+   self.current_message = ""
+  end,  -- dialog:set
 
-    update = function(self)
-      if #self.messages <= 0 then
-        return
-      end
-      self.ticks += 1
-      self.current_message = sub(self.messages[1].text, 0, self.ticks / 5)
-      if self.ticks / 5 > #self.messages[1].text + 30
-         and not self.messages[1].persistent then
-        self.ticks = 0
-        deli(self.messages, 1)
-      end
-    end,  -- dialog:update
+  update = function(self)
+   if #self.messages <= 0 then
+    return
+   end
+   self.ticks += 1
+   self.current_message = sub(self.messages[1].text, 0, self.ticks / 5)
+   if self.ticks / 5 > #self.messages[1].text + 30
+    and not self.messages[1].persistent then
+    self.ticks = 0
+    deli(self.messages, 1)
+   end
+  end,  -- dialog:update
 
-    draw = function(self)
-      if #self.messages <= 0 then
-        return
-      end
-      rectfill(0, 119, 127, 127, 1)
-      print(self.current_message, 18, 121, 7)
-      spr(self.messages[1].sprite, 0, 119, 1, 1)
-    end,  -- dialog:draw
-  }
+  draw = function(self)
+   if #self.messages <= 0 then
+    return
+   end
+   rectfill(0, 119, 127, 127, 1)
+   print(self.current_message, 18, 121, 7)
+   spr(self.messages[1].sprite, 0, 119, 1, 1)
+  end,  -- dialog:draw
+ }
 end  -- create_dialog
 
 function normalize(x, y)
@@ -351,12 +358,14 @@ function _update60()
   end
   return
  end
- if state == "intro" then
+ if dialog then
   dialog:update()
+ end
+ if state == "intro" then
   -- todo comment out btnp to disallow skipping intro
   if #dialog.messages == 0 or btnp(❎) or btnp(🅾️ ) then
    state = "game"
-   dialog.messages = {}
+   --dialog.messages = {}
    nina.state = "hide"
    return
   end
@@ -472,6 +481,30 @@ function _update60()
     hp = 1,
     speed = 0,
    })
+  elseif event.spawn == "tablet" then
+    dialog:set({
+     {
+      text = "here i draw the line",
+      sprite = 68,
+     },
+     {
+      text = "prepare to dye",
+      sprite = 68,
+     },
+   })
+   tablet = {
+    state = "entering",
+    x = event.x,
+    y = event.y,
+    dx = 0,
+    dy = 0.1,
+    pencil = {
+     x = event.x + 17,
+     y = event.y,
+     dx = 0,
+     dy = 0.1,
+    },
+   }
   end
   offset = 0
   start_time = time()
@@ -553,6 +586,21 @@ function _update60()
      del(pencils, pencil)
     end
    end
+  end
+ end
+
+ if tablet then
+  tablet.x += tablet.dx
+  tablet.y += tablet.dy
+  tablet.pencil.x += tablet.pencil.dx
+  tablet.pencil.y += tablet.pencil.dy
+
+  if tablet.state == "entering" and tablet.y >= 20 then
+   tablet.state = "fighting"
+   tablet.dx = 0
+   tablet.dy = 0
+   tablet.pencil.dx = 0
+   tablet.pencil.dy = 0
   end
  end
 
