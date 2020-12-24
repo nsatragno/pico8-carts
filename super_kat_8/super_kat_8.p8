@@ -594,15 +594,123 @@ function _update60()
   tablet.y += tablet.dy
   tablet.pencil.x += tablet.pencil.dx
   tablet.pencil.y += tablet.pencil.dy
+  tablet.dmg = false
 
   if tablet.state == "entering" and tablet.y >= 20 then
+   tablet.hp = 10
    tablet.state = "fighting"
+   tablet.pencil.state = "follow"
+   tablet.pencil.fun = 15
+   tablet.pencil.cd = 20
    tablet.dx = 0
    tablet.dy = 0
    tablet.pencil.dx = 0
    tablet.pencil.dy = 0
   end
+
+  local tablet_rect = {
+   x0 = tablet.x,
+   x1 = tablet.x + 15,
+   y0 = tablet.y,
+   y1 = tablet.y + 15,
+  }
+
+  local pencil_rect = {
+   x0 = tablet.pencil.x,
+   x1 = tablet.pencil.x + 1,
+   y0 = tablet.pencil.y,
+   y1 = tablet.pencil.y + 15,
+  }
+
+  if collides_rect(player.rect, tablet_rect) or
+     collides_rect(player.rect, pencil_rect) then
+   kill_player()
+  end
+
+  for shot in all(shots) do
+   if collides(shot, tablet_rect) then
+    del(shots, shot)
+    if tablet.state == "fighting" then
+     tablet.dmg = true
+     tablet.hp -= 1
+     if tablet.hp <= 0 then
+      explode(tablet)
+      tablet.state = "dead"
+      tablet.pencil.state = "dead"
+     end
+    end
+   end
+  end
+
+  if tablet.state == "fighting" then
+   if not tablet.target or
+      abs(tablet.x - tablet.target.x) <= 2 and
+      abs(tablet.y - tablet.target.y) <= 2 then
+    tablet.target = {
+     x = rnd(100) + 12,
+     y = rnd(50)
+    }
+    local d = normalize(tablet.target.x - tablet.x, tablet.target.y - tablet.y)
+    local s = rnd(0.8) + 0.2
+    tablet.dx = d.x * s
+    tablet.dy = d.y * s
+   end
+  end
+
+  if tablet.pencil.state == "follow" then
+   tablet.pencil.cd -= 1
+   if abs(tablet.x + 17 - tablet.pencil.x) > 2 or
+      abs(tablet.y - tablet.pencil.y) > 2 then
+    local d = normalize(tablet.x + 17 - tablet.pencil.x, tablet.y - tablet.pencil.y)
+    tablet.pencil.dx = d.x * 0.7
+    tablet.pencil.dy = d.y * 0.7
+   else
+    tablet.pencil.dx = 0
+    tablet.pencil.dy = 0
+   end
+   if tablet.pencil.cd <= 0 then
+    if rnd(3) >= 1 then
+     tablet.pencil.cd = 60 + rnd(60)
+     tablet.pencil.fun = rnd(15) + 15
+    else
+     tablet.pencil.state = "pierce"
+     tablet.pencil.target = { x = player.x, y = player.y }
+     local d = normalize(tablet.pencil.target.x - tablet.pencil.x, tablet.pencil.target.y - tablet.pencil.y - 15)
+     tablet.pencil.dx = d.x * 1.3
+     tablet.pencil.dy = d.y * 1.3
+    end
+   elseif tablet.pencil.cd < tablet.pencil.fun then
+    shoot({x = tablet.pencil.x, y = tablet.pencil.y + 16}, player, 1)
+   end
+  end
+
+  if tablet.pencil.state == "pierce" then
+   if abs(tablet.pencil.target.x - tablet.pencil.x) < 2 and
+    abs(tablet.pencil.target.y - tablet.pencil.y - 15) < 2 then
+    tablet.pencil.cd = 30
+    tablet.pencil.state = "wait"
+    tablet.pencil.dx = 0
+    tablet.pencil.dy = -0.1
+   end
+  end
+
+  if tablet.pencil.state == "wait" then
+   tablet.pencil.cd -= 1
+   if tablet.pencil.cd <= 0 then
+    if rnd(3) >= 1 then
+     tablet.pencil.state = "follow"
+     tablet.pencil.cd = 30
+    else
+     tablet.pencil.state = "pierce"
+     tablet.pencil.target = { x = player.x, y = player.y }
+     local d = normalize(tablet.pencil.target.x - tablet.pencil.x, tablet.pencil.target.y - tablet.pencil.y - 15)
+     tablet.pencil.dx = d.x * 1.3
+     tablet.pencil.dy = d.y * 1.3
+    end
+   end
+  end
  end
+
 
  for shot in all(shots) do
   shot.y -= 3
@@ -692,10 +800,14 @@ function _draw()
   pset(bullet.x, bullet.y, 14 + flr(time() * 8) % 2)
  end
 
- if tablet then
-   spr(68, tablet.x, tablet.y, 2, 2)
-   spr(70, tablet.pencil.x, tablet.pencil.y, 1, 2)
-   line(tablet.x + 15, tablet.y, tablet.pencil.x, tablet.pencil.y, 7)
+ if tablet and tablet.state != "dead" then
+  if tablet.dmg then
+   pal({[6] = 14})
+  end
+  spr(68, tablet.x, tablet.y, 2, 2)
+  spr(70, tablet.pencil.x, tablet.pencil.y, 1, 2)
+  line(tablet.x + 15, tablet.y, tablet.pencil.x, tablet.pencil.y, 7)
+  pal()
  end
 
  if player.state == "alive" or
