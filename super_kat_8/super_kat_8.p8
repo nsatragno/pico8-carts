@@ -27,16 +27,10 @@ function _init()
 
  events = {
   {
-   x = 50,
-   y = -30,
-   spawn = "tablet",
-   offset = 1,
-  },
-  {
    x = -5,
    y = 0,
    spawn = "pencil",
-   offset = 300,
+   offset = 1,
    angle = .86,
   },
   {
@@ -134,26 +128,282 @@ function _init()
    x = 20,
    y = -10,
    spawn = "brush",
-   offset = 20,
-  },
-  {
-   x = 20,
-   y = -10,
-   spawn = "brush",
    offset = 2,
   },
   {
    x = 107,
    y = -10,
    spawn = "brush",
-   offset = 3,
+   offset = 2,
   },
   {
    x = 60,
    y = -10,
    spawn = "brush",
-   offset = 5,
-  }
+   offset = 2,
+  },
+  {
+   x = 80,
+   y = -10,
+   spawn = "brush",
+   offset = 2,
+  },
+  {
+   x = 10,
+   y = -10,
+   spawn = "pencil",
+   offset = 4,
+   angle = .75,
+  },
+  {
+   x = 20,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 30,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 40,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 50,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 60,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 70,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 80,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 90,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 100,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 120,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 110,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 100,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 90,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 80,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 70,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 60,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 50,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 40,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 30,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 20,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 10,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.2,
+   angle = .75,
+  },
+  {
+   x = 30,
+   y = -10,
+   spawn = "brush",
+   offset = 3,
+  },
+  {
+   x = 15,
+   y = -10,
+   spawn = "pencil",
+   offset = 0,
+   angle = .75,
+  },
+  {
+   x = 45,
+   y = -10,
+   spawn = "pencil",
+   offset = 0,
+   angle = .75,
+  },
+  {
+   x = 15,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.5,
+   angle = .75,
+  },
+  {
+   x = 45,
+   y = -10,
+   spawn = "pencil",
+   offset = 0,
+   angle = .75,
+  },
+  {
+   x = 15,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.5,
+   angle = .75,
+  },
+  {
+   x = 45,
+   y = -10,
+   spawn = "pencil",
+   offset = 0,
+   angle = .75,
+  },
+  {
+   x = 100,
+   y = -10,
+   spawn = "brush",
+   offset = 3,
+  },
+  {
+   x = 85,
+   y = -10,
+   spawn = "pencil",
+   offset = 0,
+   angle = .75,
+  },
+  {
+   x = 115,
+   y = -10,
+   spawn = "pencil",
+   offset = 0,
+   angle = .75,
+  },
+  {
+   x = 85,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.5,
+   angle = .75,
+  },
+  {
+   x = 115,
+   y = -10,
+   spawn = "pencil",
+   offset = 0,
+   angle = .75,
+  },
+  {
+   x = 85,
+   y = -10,
+   spawn = "pencil",
+   offset = 0.5,
+   angle = .75,
+  },
+  {
+   x = 115,
+   y = -10,
+   spawn = "pencil",
+   offset = 0,
+   angle = .75,
+  },
+  {
+   x = 56,
+   y = -30,
+   spawn = "tablet",
+   offset = 10,
+  },
  }
 
  particles = {}
@@ -365,7 +615,7 @@ function _update60()
   -- todo comment out btnp to disallow skipping intro
   if #dialog.messages == 0 or btnp(❎) or btnp(🅾️ ) then
    state = "game"
-   --dialog.messages = {}
+   dialog.messages = {}
    nina.state = "hide"
    return
   end
@@ -580,8 +830,8 @@ function _update60()
 
  for pencil in all(pencils) do
   local pencil_rect = {
-   x0 = pencil.x,
-   x1 = pencil.x + 1,
+   x0 = pencil.x - 1,
+   x1 = pencil.x + 2,
    y0 = pencil.y - 4,
    y1 = pencil.y + 3,
   }
