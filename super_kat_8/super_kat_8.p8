@@ -402,7 +402,7 @@ function _init()
    x = 56,
    y = -30,
    spawn = "tablet",
-   offset = 10,
+   offset = 5,
   },
  }
 
@@ -427,6 +427,15 @@ function create_dialog(messages)
    end
    self.ticks += 1
    self.current_message = sub(self.messages[1].text, 0, self.ticks / 5)
+   if self.ticks % 5 == 0 and self.ticks < #self.messages[1].text * 5 then
+    if self.messages[1].sprite == 0 then
+     sfx(0)
+    elseif self.messages[1].sprite == 32 then
+     sfx(1)
+    elseif self.messages[1].sprite == 68 then
+     sfx(2)
+    end
+   end
    if self.ticks / 5 > #self.messages[1].text + 30
     and not self.messages[1].persistent then
     self.ticks = 0
@@ -439,7 +448,7 @@ function create_dialog(messages)
     return
    end
    rectfill(0, 119, 127, 127, 1)
-   print(self.current_message, 18, 121, 7)
+   print(self.current_message, 14, 121, 7)
    spr(self.messages[1].sprite, 0, 119, 1, 1)
   end,  -- dialog:draw
  }
@@ -471,6 +480,7 @@ function kill_player()
  if player.state != "alive" then
   return
  end
+ sfx(4)
  player.state = "dead"
  player.respawn_cd = 200
  for s = 0.25, 1, 0.25 do
@@ -500,6 +510,7 @@ function kill_player()
 end
 
 function explode(target)
+ sfx(4)
  for i = 0, 8 do
   add(particles, {
    x = target.x,
@@ -513,6 +524,7 @@ function explode(target)
 end
 
 function shoot(from, to, speed)
+ sfx(7)
  d = normalize(to.x - from.x, to.y - from.y)
  add(bullets, {
   x = from.x,
@@ -612,8 +624,7 @@ function _update60()
   dialog:update()
  end
  if state == "intro" then
-  -- todo comment out btnp to disallow skipping intro
-  if #dialog.messages == 0 or btnp(❎) or btnp(🅾️ ) then
+  if #dialog.messages == 0 then
    state = "game"
    dialog.messages = {}
    nina.state = "hide"
@@ -715,6 +726,7 @@ function _update60()
     x = player.x,
     y = player.y - 1
    })
+   sfx(6)
   end
   player.x = mid(0, player.x, 127)
   player.y = mid(0, player.y, 127)
@@ -741,6 +753,7 @@ function _update60()
     cd = flr(rnd(30)) + 120,
    })
   elseif event.spawn == "pencil" then
+   sfx(3)
    add(pencils, {
     x = event.x,
     y = event.y,
@@ -819,6 +832,7 @@ function _update60()
    if collides(shot, brush_rect) then
     del(shots, shot)
     brush.dmg = true
+    sfx(5)
     brush.hp -= 1
     if brush.hp <= 0 then
      explode(brush)
@@ -864,7 +878,7 @@ function _update60()
   tablet.dmg = false
 
   if tablet.state == "entering" and tablet.y >= 20 then
-   tablet.hp = 10
+   tablet.hp = 50
    tablet.state = "fighting"
    tablet.pencil.state = "follow"
    tablet.pencil.fun = 15
@@ -899,8 +913,11 @@ function _update60()
     del(shots, shot)
     if tablet.state == "fighting" then
      tablet.dmg = true
+     sfx(5)
      tablet.hp -= 1
      if tablet.hp <= 0 then
+      bullets = {}
+      player.state = "alive"
       tablet.state = "dead"
       tablet.pencil.state = "dead"
       tablet.cd = 200
@@ -937,6 +954,14 @@ function _update60()
      },
      {
       text = "now we can snuggle!",
+      sprite = 32,
+     },
+     {
+      text = "trying to tell me something?",
+      sprite = 0,
+     },
+     {
+      text = "yes, to tell you that",
       sprite = 32,
      },
      {
@@ -1322,3 +1347,12 @@ __label__
 1f444f11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
 11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
 
+__sfx__
+00010000190501c0501f0500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000100001905017050150500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00010000323502f3502c3500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00030000206001d6001b60018600206201d6301b630186501665013650106500d6500965006650046500265000650006500065000640006300062000610006000060000600006000060000600000000000000000
+001000001c6501865015640126300f6200c6100861004600016000060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000600000d05007050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000200002a0502f050340500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00010000260502e050340500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
