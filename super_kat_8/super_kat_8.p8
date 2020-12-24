@@ -370,8 +370,18 @@ function _update60()
    return
   end
 
+  if abs(54 - player.x) >= 1 or abs(100 - player.y) >= 1 then
+   local d = normalize(54 - player.x, 100 - player.y)
+   player.x += d.x * 0.1
+   player.y += d.y * 0.1
+  end
+
   nina.x += nina.dx
   nina.y += nina.dy
+
+  if nina.y >= 100 then
+   nina.dy = 0
+  end
 
   if tablet then
     tablet.x += tablet.dx
@@ -393,6 +403,13 @@ function _update60()
     local d = normalize(nina.x - tablet.pencil.x, nina.y - tablet.pencil.y + 15)
     tablet.pencil.dx = d.x * 0.7
     tablet.pencil.dy = d.y * 0.7
+  end
+  if dialog.messages[1].action == "spawn_heart" then
+   dialog.messages[1].action = nil
+   heart = {
+    x = 56,
+    y = 56,
+   }
   end
   if dialog.messages[1].action == "spawn_tablet" then
     dialog.messages[1].action = nil
@@ -634,11 +651,52 @@ function _update60()
      tablet.dmg = true
      tablet.hp -= 1
      if tablet.hp <= 0 then
-      explode(tablet)
       tablet.state = "dead"
       tablet.pencil.state = "dead"
+      tablet.cd = 200
+      tablet.dx = 0
+      tablet.dy = 0
+      tablet.pencil.dx = 0
+      tablet.pencil.dy = 0
      end
     end
+   end
+  end
+
+  if tablet.state == "dead" then
+   tablet.cd -= 1
+   if tablet.cd >= 60 then
+    explode({ x = tablet.x + rnd(16), y = tablet.y + rnd(16)})
+   end
+   if tablet.cd <= 0 then
+    tablet = nil
+    nina.state = "show"
+    state = "intro"
+    nina.x = 74
+    nina.y = -10
+    nina.dy = 0.2
+    nina.dx = 0
+    dialog:set({
+     {
+      text = "you did it!",
+      sprite = 32,
+     },
+     {
+      text = "you rescued me from art!",
+      sprite = 32,
+     },
+     {
+      text = "now we can snuggle!",
+      sprite = 32,
+     },
+     {
+      text = "i love you kat <3",
+      sprite = 32,
+      persistent = true,
+      action = "spawn_heart",
+     },
+    })
+    return
    end
   end
 
@@ -800,7 +858,7 @@ function _draw()
   pset(bullet.x, bullet.y, 14 + flr(time() * 8) % 2)
  end
 
- if tablet and tablet.state != "dead" then
+ if tablet and tablet.state != "dead" and tablet.state != "hidden" then
   if tablet.dmg then
    pal({[6] = 14})
   end
@@ -818,6 +876,10 @@ function _draw()
 
  if nina.state == "show" then
   spr(nina.sprite, nina.x - 3, nina.y - 7, 1, 2)
+ end
+
+ if heart then
+  spr(4, heart.x, heart.y, 2, 2)
  end
 
  -- hud
